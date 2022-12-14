@@ -1,4 +1,4 @@
-package webapps.blog.src.model.dto;
+package model.dto;
 
 public class RegisterUserDTO {
     public String uname;

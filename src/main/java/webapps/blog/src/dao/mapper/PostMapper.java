@@ -1,7 +1,7 @@
-package webapps.blog.src.dao.mapper;
+package dao.mapper;
 
 import org.apache.ibatis.annotations.*;
-import webapps.blog.src.model.Post;
+import model.Post;
 
 public interface PostMapper {
 

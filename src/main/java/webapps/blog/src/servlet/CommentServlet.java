@@ -1,4 +1,4 @@
-package webapps.blog.src.servlet;
+package servlet;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -6,10 +6,11 @@ import com.google.gson.GsonBuilder;
 import server.http.servlet.HttpServlet;
 import server.http.servlet.HttpServletRequest;
 import server.http.servlet.HttpServletResponse;
-import webapps.blog.src.dao.Dao;
-import webapps.blog.src.model.Comment;
+import dao.Dao;
+import model.Comment;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 public class CommentServlet extends HttpServlet {
 
@@ -17,7 +18,7 @@ public class CommentServlet extends HttpServlet {
     Gson gson;
 
     @Override
-    public void init()  {
+    public void init() {
         dao = new Dao();
         gson = new GsonBuilder().setPrettyPrinting().create();
     }
@@ -53,6 +54,9 @@ public class CommentServlet extends HttpServlet {
 
     private void writeAsJson(HttpServletResponse resp, Object obj) throws IOException {
         String json = gson.toJson(obj);
-        resp.getWriter().println(json);
+        resp.setContentType("application/json");
+        PrintWriter writer = resp.getWriter();
+        writer.println(json);
+        writer.flush();
     }
 }

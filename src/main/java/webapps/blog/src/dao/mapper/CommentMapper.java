@@ -1,8 +1,8 @@
-package webapps.blog.src.dao.mapper;
+package dao.mapper;
 
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
-import webapps.blog.src.model.Comment;
+import model.Comment;
 
 public interface CommentMapper {
 

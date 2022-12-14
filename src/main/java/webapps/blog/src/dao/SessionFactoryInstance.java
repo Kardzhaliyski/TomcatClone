@@ -1,4 +1,4 @@
-package webapps.blog.src.dao;
+package dao;
 
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;

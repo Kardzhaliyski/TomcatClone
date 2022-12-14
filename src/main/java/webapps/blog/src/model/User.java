@@ -1,4 +1,4 @@
-package webapps.blog.src.model;
+package model;
 
 public class User {
     public String username;

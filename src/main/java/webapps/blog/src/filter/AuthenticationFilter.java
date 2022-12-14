@@ -1,4 +1,4 @@
-package webapps.blog.src.filter;
+package filter;
 
 import java.io.IOException;
 
@@ -6,9 +6,9 @@ import server.http.servlet.FilterChain;
 import server.http.servlet.HttpFilter;
 import server.http.servlet.HttpServletRequest;
 import server.http.servlet.HttpServletResponse;
-import webapps.blog.src.model.AuthToken;
-import webapps.blog.src.service.AuthenticationService;
-import webapps.blog.src.servlet.Utils;
+import model.AuthToken;
+import service.AuthenticationService;
+import servlet.Utils;
 
 import static server.http.servlet.HttpServletResponse.SC_UNAUTHORIZED;
 

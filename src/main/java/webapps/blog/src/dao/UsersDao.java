@@ -1,10 +1,10 @@
-package webapps.blog.src.dao;
+package dao;
 
 
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
-import webapps.blog.src.dao.mapper.UserMapper;
-import webapps.blog.src.model.User;
+import dao.mapper.UserMapper;
+import model.User;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package webapps.blog.src.model;
+package model;
 
 public class Post {
     public int id;

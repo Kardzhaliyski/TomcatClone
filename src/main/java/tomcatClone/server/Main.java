@@ -1,7 +1,12 @@
 package server;
 
 import org.apache.commons.cli.*;
+import org.xml.sax.SAXException;
+import server.dispatcher.ServletDispatcher;
 import server.utils.CliOptions;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 
 public class Main {
     public static HelpFormatter helpFormatter = new HelpFormatter();
@@ -21,6 +26,15 @@ public class Main {
         }
 
         ServerBuilder builder = new ServerBuilder(cli);
+        try {
+            ServletDispatcher servletDispatcher = new ServletDispatcher("src/main/java/webapps/blog/web.xml"); //todo
+            builder.setServletDispatcher(servletDispatcher);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(5);
+        }
+
         Server server = builder.build();
 
         server.start();

@@ -1,15 +1,15 @@
-package webapps.blog.src.servlet;
+package servlet;
 
 import static server.http.servlet.HttpServletResponse.*;
-import static webapps.blog.src.servlet.Utils.*;
+import static servlet.Utils.*;
 
 import server.http.servlet.HttpServlet;
 import server.http.servlet.HttpServletRequest;
 import server.http.servlet.HttpServletResponse;
-import webapps.blog.src.dao.UsersDao;
-import webapps.blog.src.model.User;
-import webapps.blog.src.model.dto.RegisterUserDTO;
 import org.apache.commons.codec.digest.DigestUtils;
+import dao.UsersDao;
+import model.User;
+import model.dto.RegisterUserDTO;
 
 import java.io.IOException;
 import java.util.Random;

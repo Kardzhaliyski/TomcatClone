@@ -1,7 +1,9 @@
 package server;
 
 import org.apache.commons.cli.Option;
+import server.dispatcher.ServletDispatcher;
 import server.http.HttpTask;
+
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -19,13 +21,16 @@ public class Server {
     public Path root;
     public Set<Option> options;
 
-    public Server(String root, int port, int threadCount, boolean showDirectoryContent, Set<Option> options) {
+    public ServletDispatcher servletDispatcher;
+
+    public Server(String root, int port, int threadCount, boolean showDirectoryContent, Set<Option> options, ServletDispatcher servletDispatcher) {
         this.root = Path.of(root);
         this.port = port;
         this.executorService = Executors.newFixedThreadPool(threadCount);
         this.showDirectoryContent = showDirectoryContent;
         this.options = options;
         instance = this;
+        this.servletDispatcher = servletDispatcher;
     }
 
     public void start() {

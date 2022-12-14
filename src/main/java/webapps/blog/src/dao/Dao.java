@@ -1,11 +1,11 @@
-package webapps.blog.src.dao;
+package dao;
 
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
-import webapps.blog.src.dao.mapper.CommentMapper;
-import webapps.blog.src.dao.mapper.PostMapper;
-import webapps.blog.src.model.Comment;
-import webapps.blog.src.model.Post;
+import dao.mapper.CommentMapper;
+import dao.mapper.PostMapper;
+import model.Comment;
+import model.Post;
 
 import java.io.IOException;
 

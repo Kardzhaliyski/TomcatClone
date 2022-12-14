@@ -1,4 +1,4 @@
-package webapps.blog.src.filter;
+package filter;
 
 
 import org.apache.logging.log4j.LogManager;
@@ -7,8 +7,8 @@ import server.http.servlet.FilterChain;
 import server.http.servlet.HttpFilter;
 import server.http.servlet.HttpServletRequest;
 import server.http.servlet.HttpServletResponse;
-import webapps.blog.src.model.AuthToken;
-import webapps.blog.src.service.AuthenticationService;
+import model.AuthToken;
+import service.AuthenticationService;
 
 import java.io.IOException;
 

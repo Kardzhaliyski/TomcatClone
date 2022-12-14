@@ -2,6 +2,7 @@ package server;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import server.dispatcher.ServletDispatcher;
 import server.utils.CliOptions;
 
 import java.util.Set;
@@ -16,6 +17,7 @@ public class ServerBuilder {
     private boolean showDirectoryContent = false;
     private String root = DEFAULT_DIRECTORY;
     private Set<Option> options = null;
+    private ServletDispatcher servletDispatcher = null;
 
     public ServerBuilder() {
     }
@@ -45,7 +47,7 @@ public class ServerBuilder {
     }
 
     public Server build() {
-        return new Server(root, port, threadCount, showDirectoryContent, options);
+        return new Server(root, port, threadCount, showDirectoryContent, options, servletDispatcher);
     }
 
     public ServerBuilder setPort(int port) {
@@ -65,6 +67,11 @@ public class ServerBuilder {
 
     public ServerBuilder setRoot(String root) {
         this.root = root;
+        return this;
+    }
+
+    public ServerBuilder setServletDispatcher(ServletDispatcher dispatcher) {
+        this.servletDispatcher = dispatcher;
         return this;
     }
 }

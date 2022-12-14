@@ -8,8 +8,9 @@ public class HttpRequest {
     public String method;
     public String path;
     public String protocol;
-    public Map<String, String> headers;
-    public byte[] body;
+    public Map<String, String> headers = new HashMap<>();
+    public Reader reader;
+    public Map<String, String> params = new HashMap<>();
 
     public HttpRequest(InputStream inputStream) {
         InputStreamReader in = new InputStreamReader(inputStream);
@@ -17,12 +18,15 @@ public class HttpRequest {
         String[] info = line.split(" ");
         method = info[0];
         path = info[1];
-        if(path.startsWith("/")) {
-            path = path.substring(1);
+        path = extractParams(path);
+//        if (path.startsWith("/")) {
+//            path = path.substring(1);
+//        }
+        if(path.length() > 1 && path.endsWith("/")) {
+            path = path.substring(0, path.length() -1);
         }
 
         protocol = info[2];
-        headers = new HashMap<>();
         while ((line = readLine(in)) != null) {
             if (line.isBlank()) {
                 break;
@@ -40,22 +44,42 @@ public class HttpRequest {
             }
         }
 
-        if(line == null) {
-            body = new byte[0];
-            return;
+        reader = in;
+    }
+
+    private String extractParams(String path) {
+        int i = path.indexOf("#");
+        if (i != -1) {
+            path = path.substring(0, i);
         }
 
-//        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-//        int r;
-//        while ((r = inputStream.read()) != -1) {
-//            System.out.println();
-//            byteBuffer.write(r);
-//        }
-//
-//        body = byteBuffer.toByteArray();
+        i = path.indexOf("?");
+        if (i == -1) {
+            return path;
+        }
+
+        String queryString = path.substring(i + 1);
+        for (String s : queryString.split("&")) {
+            String[] split = s.split("=");
+            if(split.length < 2) {
+                break;
+            }
+
+            String key = split[0];
+            String value = split[1];
+
+            if(key == null || value == null || key.isBlank() || value.isBlank()){
+                continue;
+            }
+
+            params.put(key, value);
+        }
+
+        return path.substring(0, i);
     }
 
     private StringBuilder rlSb;
+
     private String readLine(InputStreamReader in) {
         if (rlSb == null) {
             rlSb = new StringBuilder();

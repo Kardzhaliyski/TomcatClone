@@ -1,9 +1,9 @@
-package webapps.blog.src.dao;
+package dao;
 
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
-import webapps.blog.src.dao.mapper.AuthTokenMapper;
-import webapps.blog.src.model.AuthToken;
+import dao.mapper.AuthTokenMapper;
+import model.AuthToken;
 
 import java.io.IOException;
 

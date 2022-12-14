@@ -1,9 +1,9 @@
-package webapps.blog.src.service;
+package service;
 
 
 import org.apache.commons.codec.digest.DigestUtils;
-import webapps.blog.src.dao.TokenDao;
-import webapps.blog.src.model.AuthToken;
+import dao.TokenDao;
+import model.AuthToken;
 
 import java.util.HashMap;
 import java.util.Map;

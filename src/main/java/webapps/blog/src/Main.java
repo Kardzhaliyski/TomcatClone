@@ -1,4 +1,3 @@
-package webapps.blog.src;
 
 import org.apache.logging.log4j.LogBuilder;
 import org.apache.logging.log4j.LogManager;

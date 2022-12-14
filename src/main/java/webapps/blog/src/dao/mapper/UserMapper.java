@@ -1,8 +1,8 @@
-package webapps.blog.src.dao.mapper;
+package dao.mapper;
 
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
-import webapps.blog.src.model.User;
+import model.User;
 
 public interface UserMapper {
 

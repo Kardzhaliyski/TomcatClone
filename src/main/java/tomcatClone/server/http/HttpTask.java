@@ -1,7 +1,10 @@
 package server.http;
 
+import server.dispatcher.ServletDispatcher;
 import server.handlers.GETHandler;
 import server.Server;
+import server.http.servlet.HttpServletRequest;
+import server.http.servlet.HttpServletResponse;
 import server.utils.StatusCode;
 
 import java.io.IOException;
@@ -25,26 +28,29 @@ public class HttpTask implements Runnable {
             InputStream inputStream = socket.getInputStream();
             HttpRequest request = new HttpRequest(inputStream);
             log(request);
-
-            HttpResponse response;
-            if (request.method.equals("GET")) {
-                response = GETHandler.handle(server, request);
-                String ae = request.headers.get("Accept-Encoding");
-                if (ae != null && ae.contains("gzip")) {
-                    response.serverAcceptGzip = true;
-                }
-
-                if (response.statusCode == StatusCode.NOT_FOUND) {
-                    logError(request.method, request.path, response.statusCode);
-                }
-            } else {
-                response = HttpResponseFactory.methodNotAllowed(request.protocol);
-                logError(request.method, request.path, response.statusCode);
-            }
+            HttpServletResponse response = new HttpServletResponse(request, socket.getOutputStream());
+            server.servletDispatcher.dispatch(request, response);
 
 
-            OutputStream outputStream = socket.getOutputStream();
-            response.send(outputStream);
+//            HttpResponse response;
+//            if (request.method.equals("GET")) {
+//                response = GETHandler.handle(server, request);
+//                String ae = request.headers.get("Accept-Encoding");
+//                if (ae != null && ae.contains("gzip")) {
+//                    response.serverAcceptGzip = true;
+//                }
+//
+//                if (response.statusCode == StatusCode.NOT_FOUND) {
+//                    logError(request.method, request.path, response.statusCode);
+//                }
+//            } else {
+//                response = HttpResponseFactory.methodNotAllowed(request.protocol);
+//                logError(request.method, request.path, response.statusCode);
+//            }
+//
+//
+//            OutputStream outputStream = socket.getOutputStream();
+//            response.send(outputStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
@@ -66,7 +72,7 @@ public class HttpTask implements Runnable {
     }
 
     private void log(HttpRequest request) {
-        System.out.printf("[%s] \"%s /%s\" \"%s\"%n",
+        System.out.printf("[%s] \"%s %s\" \"%s\"%n",
                 Instant.now().toString(),
                 request.method,
                 request.path,

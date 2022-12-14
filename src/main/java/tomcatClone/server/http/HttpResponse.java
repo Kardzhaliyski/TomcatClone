@@ -1,7 +1,5 @@
 package server.http;
 
-import server.Server;
-import server.utils.CliOptions;
 import server.utils.Gzip;
 import server.utils.StatusCode;
 
@@ -21,6 +19,8 @@ public class HttpResponse {
     private File bodyFile = null;
     public boolean serverAcceptGzip = false;
     public boolean compressed = false;
+
+
 
     public HttpResponse(String protocol, StatusCode statusCode) {
         this.protocol = protocol;

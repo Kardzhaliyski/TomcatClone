@@ -1,7 +1,7 @@
-package webapps.blog.src.servlet;
+package servlet;
 
+import static servlet.Utils.*;
 import static server.http.servlet.HttpServletResponse.*;
-import static webapps.blog.src.servlet.Utils.*;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,8 +9,8 @@ import server.http.servlet.HttpServlet;
 import server.http.servlet.HttpServletRequest;
 import server.http.servlet.HttpServletResponse;
 import server.http.servlet.RequestDispatcher;
-import webapps.blog.src.dao.Dao;
-import webapps.blog.src.model.Post;
+import dao.Dao;
+import model.Post;
 
 import java.io.IOException;
 import java.util.regex.Matcher;

@@ -1,4 +1,4 @@
-package webapps.blog.src.servlet;
+package servlet;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
