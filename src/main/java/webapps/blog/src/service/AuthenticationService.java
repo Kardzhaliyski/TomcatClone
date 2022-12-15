@@ -14,7 +14,7 @@ public class AuthenticationService {
     public static AuthenticationService instance = null;
     private final TokenDao dao;
     private final Random random;
-    private Map<String, AuthToken> tokenMap = new HashMap<>();
+    private Map<String, AuthToken> tokenMap = new HashMap<>(); //todo remove if expired
 
     public static AuthenticationService getInstance() {
         if(instance == null) {
@@ -30,7 +30,17 @@ public class AuthenticationService {
         this.random = new Random();
     }
 
-    public boolean isValid(String token) {
+    public boolean isValid(String tokenHeader) {
+        if(tokenHeader == null) {
+            return false;
+        }
+
+        boolean correctSchema = tokenHeader.startsWith("Bearer ");
+        if (!correctSchema) {
+            return false;
+        }
+
+        String token = tokenHeader.substring(7);
         if (tokenMap.containsKey(token)) {
             return true;
         }
@@ -46,7 +56,10 @@ public class AuthenticationService {
 
     public String createNewToken(String username) {
         int salt = random.nextInt();
-        String token = DigestUtils.sha1Hex(username + "$" + salt);
+        String token;
+        do {
+            token = DigestUtils.sha1Hex(username + "$" + salt);
+        } while (dao.getToken(token) != null); //todo make containsToken()
         AuthToken authToken = new AuthToken(username, token);
         dao.addToken(authToken);
         tokenMap.put(token, authToken);
@@ -63,20 +76,11 @@ public class AuthenticationService {
     }
 
     public AuthToken getAuthToken(String authHeader) {
-        if(authHeader == null) {
-            return null;
-        }
-
-        boolean correctSchema = authHeader.startsWith("Bearer ");
-        if (!correctSchema) {
+        if (!isValid(authHeader)) {
             return null;
         }
 
         String token = authHeader.substring(7);
-        if (!isValid(token)) {
-            return null;
-        }
-
         return getToken(token);
     }
 }

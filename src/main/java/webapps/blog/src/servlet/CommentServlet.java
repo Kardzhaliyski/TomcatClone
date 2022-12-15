@@ -1,5 +1,7 @@
 package servlet;
 
+import static servlet.Utils.*;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -10,7 +12,6 @@ import dao.Dao;
 import model.Comment;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 public class CommentServlet extends HttpServlet {
 
@@ -52,11 +53,11 @@ public class CommentServlet extends HttpServlet {
         return true;
     }
 
-    private void writeAsJson(HttpServletResponse resp, Object obj) throws IOException {
-        String json = gson.toJson(obj);
-        resp.setContentType("application/json");
-        PrintWriter writer = resp.getWriter();
-        writer.println(json);
-        writer.flush();
-    }
+//    private void writeAsJson(HttpServletResponse resp, Object obj) throws IOException {
+//        String json = gson.toJson(obj);
+//        resp.setContentType("application/json");
+//        PrintWriter writer = resp.getWriter();
+//        writer.println(json);
+//        writer.flush();
+//    }
 }

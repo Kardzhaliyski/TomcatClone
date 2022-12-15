@@ -17,6 +17,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.Socket;
 import java.util.*;
 
 public class ServletDispatcher {
@@ -26,65 +27,149 @@ public class ServletDispatcher {
         //todo remove
     }
 
-
-    private class FilterMapping {
-        String filterName;
-        String urlPath;
-        String servletName;
-
-        public FilterMapping(String filterName, String urlPath, String servletName) {
-            this.filterName = filterName;
-            this.urlPath = urlPath;
-            this.servletName = servletName;
-        }
-    }
-
     private static class NameClassPair {
         String name;
         String className;
     }
 
+    private static class ServletInfo {
+        String servletName = null;
+        String servletPattern = null;
+        String pathInfo = null;
+    }
+
+    private static class FilterMapping {
+        String name;
+        String pattern;
+
+        public FilterMapping(String name, String urlPattern) {
+            this.name = name;
+            this.pattern = urlPattern;
+        }
+    }
+
     private final Map<String, HttpFilter> filters = new HashMap<>();
     private final Map<String, HttpServlet> servlets = new HashMap<>();
-    private final Set<FilterMapping> filterMappingSet = new LinkedHashSet<>();
+//    private final Set<FilterMapping> filterMappingSet = new LinkedHashSet<>();
+    private final List<FilterMapping>  filterMappings = new ArrayList<>();
     private final Map<String, String> servletMapping = new LinkedHashMap<>();
 
     public ServletDispatcher(String webXmlPath) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document doc = documentBuilder.parse(webXmlPath); //todo maybe change
 
-        NodeList filterNodes = doc.getElementsByTagName("filter");
-        List<NameClassPair> filtersData = parseFilters(filterNodes);
-        initObjects(filtersData, HttpFilter.class);
+        NodeList fn = doc.getElementsByTagName("filter");
+        List<NameClassPair> filtersData = parseFilters(fn);
+        initObjects(filtersData);
 
-        NodeList filterMappingNotes = doc.getElementsByTagName("filter-mapping");
-        parseFilterMappings(filterMappingNotes);
+        NodeList sn = doc.getElementsByTagName("servlet");
+        List<NameClassPair> servletsData = parseServlets(sn);
+        initObjects(servletsData);
 
-        NodeList servletNodes = doc.getElementsByTagName("servlet");
-        List<NameClassPair> servletsData = parseServlets(servletNodes);
-        initObjects(servletsData, HttpServlet.class);
+        NodeList smn = doc.getElementsByTagName("servlet-mapping");
+        parseServletMappings(smn);
 
-        NodeList servletMappingNotes = doc.getElementsByTagName("servlet-mapping");
-        parseServletMappings(servletMappingNotes);
+        NodeList fmn = doc.getElementsByTagName("filter-mapping");
+        parseFilterMappings(fmn);
+
     }
 
-    public void dispatch(HttpRequest request, HttpServletResponse response) throws IOException {
-        String path = request.path;
-        for (Map.Entry<String, String> kvp : servletMapping.entrySet()) {
-            String servletPath = kvp.getKey();
-            int i = servletPath.indexOf("*");
+    public void dispatch(HttpRequest request, Socket socket) throws IOException {
+        FilterChain chain = getFilterChain(request.path);
+        ServletInfo data = new ServletInfo(); //todo fix name
+        getServletInfo(request.path, data);
+
+        if (data.servletName == null) {
+            //todo return 404
+            return;
+        }
+
+        HttpServlet httpServlet = servlets.get(data.servletName);
+        if (httpServlet != null) {
+            chain.setServlet(httpServlet);
+        } else {
+            //todo log error
+        }
+
+        HttpServletRequest req = new HttpServletRequest(request, data.servletPattern, data.pathInfo);
+        HttpServletResponse res = new HttpServletResponse(request, socket.getOutputStream());
+        chain.doFilter(req, res);
+    }
+
+    private FilterChain getFilterChain(String path) {
+        FilterChain chain = new FilterChain();
+        for (FilterMapping mapping : filterMappings) {
+            String urlPattern = mapping.pattern;
+            int i = urlPattern.indexOf("*");
             if (i == -1) {
-                if (path.equals(servletPath)) {
-                    String servletName = kvp.getValue();
-                    HttpServlet httpServlet = servlets.get(servletName);
-                    httpServlet.service(new HttpServletRequest(request, servletPath), response);
-                    return;
+                if (!path.equals(urlPattern)) {
+                    continue;
                 }
+
+                String filterName = mapping.name;
+                HttpFilter filter = filters.get(filterName);
+                if (filter != null) {
+                    chain.addFilter(filter);
+                } else {
+                    //todo log error
+                }
+
+                continue;
+            }
+
+            if (i > 0 && urlPattern.charAt(i - 1) == '/') {
+                String fPath = urlPattern.substring(0, i - 1);
+                if (path.startsWith(fPath)) {
+                    String filterName = mapping.name;
+                    HttpFilter filter = filters.get(filterName);
+                    if (filter != null) {
+                        chain.addFilter(filter);
+                    } else {
+                        //todo log error
+                    }
+                }
+            } else {
+                //todo maybe throw exception
+            }
+        }
+
+        return chain;
+    }
+
+    private void getServletInfo(String path, ServletInfo data) {
+        for (Map.Entry<String, String> kvp : servletMapping.entrySet()) {
+            String urlPattern = kvp.getValue();
+            int i = urlPattern.indexOf("*");
+            if (i == -1) {
+                if (!path.equals(urlPattern)) {
+                    continue;
+                }
+
+                data.servletName = kvp.getKey();
+                data.servletPattern = urlPattern;
+                break;
+            }
+
+
+            if (i > 0 && urlPattern.charAt(i - 1) == '/') {
+                String sp = urlPattern.substring(0, i - 1);
+                if (path.startsWith(sp)) {
+                    data.servletName = kvp.getKey();
+                    data.servletPattern = sp;
+                    data.pathInfo = path.substring(i - 1);
+                    if (data.pathInfo.isEmpty()) {
+                        data.pathInfo = null;
+                    }
+
+                    break;
+                }
+            } else {
+                //todo maybe throw exception
             }
         }
     }
 
-    private void initObjects(List<NameClassPair> list, Class<?> type) {
+    private void initObjects(List<NameClassPair> list) {
         for (NameClassPair pair : list) {
             String name = pair.name;
             String className = pair.className;
@@ -100,10 +185,10 @@ public class ServletDispatcher {
                 Constructor<?> constructor = clazz.getConstructor();
                 Object instance = constructor.newInstance();
 
-                if (type.equals(HttpServlet.class)) {
-                    servlets.put(name, (HttpServlet) instance);
-                } else if (type.equals(HttpFilter.class)) {
-                    filters.put(name, (HttpFilter) instance);
+                if (instance instanceof HttpServlet servlet) {
+                    servlets.put(name, servlet);
+                } else if (instance instanceof HttpFilter filter) {
+                    filters.put(name, filter);
                 }
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException("Class not found with name: " + className, e);
@@ -161,10 +246,26 @@ public class ServletDispatcher {
             }
 
             String urlPattern = getTextFromTag(elem, "url-pattern");
-            String servletName = getTextFromTag(elem, "servlet-name");
+            if(urlPattern != null) {
+                FilterMapping pair = new FilterMapping(filterName, urlPattern);
+                filterMappings.add(pair);
+                continue;
+            }
 
-            FilterMapping fm = new FilterMapping(filterName, urlPattern, servletName);
-            filterMappingSet.add(fm);
+            String servletName = getTextFromTag(elem, "servlet-name");
+            if(servletName == null) {
+                //todo log error
+                continue;
+            }
+
+            String pattern = servletMapping.get(servletName);
+            if(pattern == null) {
+                //todo log error
+                continue;
+            }
+
+            FilterMapping pair = new FilterMapping(filterName, pattern);
+            filterMappings.add(pair);
         }
     }
 
@@ -187,7 +288,7 @@ public class ServletDispatcher {
                 urlPattern = urlPattern.substring(0, urlPattern.length() - 1);
             }
 
-            servletMapping.put(urlPattern, servletName);
+            servletMapping.put(servletName, urlPattern);
         }
     }
 }

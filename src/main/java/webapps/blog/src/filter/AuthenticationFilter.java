@@ -2,7 +2,7 @@ package filter;
 
 import java.io.IOException;
 
-import server.http.servlet.FilterChain;
+import server.dispatcher.FilterChain;
 import server.http.servlet.HttpFilter;
 import server.http.servlet.HttpServletRequest;
 import server.http.servlet.HttpServletResponse;
@@ -22,11 +22,10 @@ public class AuthenticationFilter extends HttpFilter {
     }
 
     @Override
-    protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException {
+    public void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException {
 
         String authHeader = req.getHeader("Authorization");
-        AuthToken authToken = authService.getAuthToken(authHeader);
-        if(authToken == null) {
+        if(!authService.isValid(authHeader)) {
             Utils.writeErrorAsJson(res, SC_UNAUTHORIZED, "User not logged in.");
             return;
         }

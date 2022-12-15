@@ -3,7 +3,7 @@ package filter;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import server.http.servlet.FilterChain;
+import server.dispatcher.FilterChain;
 import server.http.servlet.HttpFilter;
 import server.http.servlet.HttpServletRequest;
 import server.http.servlet.HttpServletResponse;
@@ -22,7 +22,7 @@ public class LoggingFilter extends HttpFilter {
     }
 
     @Override
-    protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException {
+    public void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException {
         long before = System.currentTimeMillis();
         try {
             chain.doFilter(req, res);

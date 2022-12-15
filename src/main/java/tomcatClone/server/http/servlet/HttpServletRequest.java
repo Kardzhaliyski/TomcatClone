@@ -14,6 +14,12 @@ public class HttpServletRequest {
         setPathData(urlPattern);
     }
 
+    public HttpServletRequest(HttpRequest request, String servletPath, String pathInfo) {
+        this.request = request;
+        this.servletPath = servletPath;
+        this.pathInfo = pathInfo;
+    }
+
     private void setPathData(String urlPattern) {
         int i = urlPattern.indexOf('*');
         if (i == -1) {

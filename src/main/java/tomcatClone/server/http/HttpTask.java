@@ -28,8 +28,7 @@ public class HttpTask implements Runnable {
             InputStream inputStream = socket.getInputStream();
             HttpRequest request = new HttpRequest(inputStream);
             log(request);
-            HttpServletResponse response = new HttpServletResponse(request, socket.getOutputStream());
-            server.servletDispatcher.dispatch(request, response);
+            server.servletDispatcher.dispatch(request, socket);
 
 
 //            HttpResponse response;

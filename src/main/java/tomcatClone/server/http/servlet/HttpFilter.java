@@ -1,10 +1,18 @@
 package server.http.servlet;
 
+import server.dispatcher.FilterChain;
+
 import java.io.IOException;
 
 public class HttpFilter {
+
+    public HttpFilter() {
+        init();
+    }
+
     public void init()  {}
-    protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException {
+    public void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException {
 
     }
+
 }

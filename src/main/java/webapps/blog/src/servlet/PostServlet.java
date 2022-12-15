@@ -18,7 +18,8 @@ import java.util.regex.Pattern;
 
 public class PostServlet extends HttpServlet {
 
-    Pattern GET_PATH_PATTERN = Pattern.compile("/([0-9]+)(?:(/comments)|/)?");
+//    Pattern GET_PATH_PATTERN = Pattern.compile("/([0-9]+)(?:(/comments)|/)?");
+    Pattern GET_PATH_PATTERN = Pattern.compile("\\/([0-9]+)(?:(\\/comments)|\\/)?");
     Pattern DELETE_PUT_PATH_PATTERN = Pattern.compile("/([0-9]+)/?");
     Dao dao;
     Gson gson;
@@ -46,7 +47,7 @@ public class PostServlet extends HttpServlet {
         }
 
         int id = Integer.parseInt(matcher.group(1));
-        if (matcher.groupCount() == 1) {
+        if (matcher.group(2) == null) {
             Post post = dao.getPostById(id);
             if (post == null) {
                 writeErrorAsJson(resp, SC_NOT_FOUND, "");

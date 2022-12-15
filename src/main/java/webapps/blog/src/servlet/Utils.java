@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import server.http.servlet.HttpServletResponse;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 public class Utils {
     public static Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -15,7 +16,9 @@ public class Utils {
         String json = gson.toJson(msg);
         resp.setContentType("application/json");
         resp.setStatus(statusCode);
-        resp.getWriter().println(json);
+        PrintWriter writer = resp.getWriter();
+        writer.println(json);
+        writer.flush();
         log.info("{} : {}", statusCode, msg);
     }
 
@@ -27,6 +30,8 @@ public class Utils {
     public static void writeAsJson(HttpServletResponse resp, Object obj) throws IOException {
         String json = gson.toJson(obj);
         resp.setContentType("application/json");
-        resp.getWriter().println(json);
+        PrintWriter writer = resp.getWriter();
+        writer.println(json);
+        writer.flush();
     }
 }

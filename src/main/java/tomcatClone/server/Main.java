@@ -1,12 +1,9 @@
 package server;
 
 import org.apache.commons.cli.*;
-import org.xml.sax.SAXException;
 import server.dispatcher.ServletDispatcher;
 import server.utils.CliOptions;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
 
 public class Main {
     public static HelpFormatter helpFormatter = new HelpFormatter();
