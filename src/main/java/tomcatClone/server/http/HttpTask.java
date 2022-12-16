@@ -1,15 +1,10 @@
 package server.http;
 
-import server.dispatcher.ServletDispatcher;
-import server.handlers.GETHandler;
 import server.Server;
-import server.http.servlet.HttpServletRequest;
-import server.http.servlet.HttpServletResponse;
 import server.utils.StatusCode;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.time.Instant;
 

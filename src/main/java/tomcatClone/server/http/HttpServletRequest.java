@@ -1,6 +1,6 @@
-package server.http.servlet;
+package server.http;
 
-import server.http.HttpRequest;
+import server.Server;
 
 import java.io.Reader;
 
@@ -9,29 +9,20 @@ public class HttpServletRequest {
     private String servletPath;
     private String pathInfo;
 
-    public HttpServletRequest(HttpRequest httpRequest, String urlPattern) {
-        this.request = httpRequest;
-        setPathData(urlPattern);
-    }
-
     public HttpServletRequest(HttpRequest request, String servletPath, String pathInfo) {
         this.request = request;
         this.servletPath = servletPath;
         this.pathInfo = pathInfo;
     }
 
-    private void setPathData(String urlPattern) {
-        int i = urlPattern.indexOf('*');
-        if (i == -1) {
-            servletPath = urlPattern;
-            pathInfo = null;
-            return;
-        }
+    public HttpServletRequest(HttpServletRequest request, String servletPath, String pathInfo) {
+        this.request = request.request;
+        this.servletPath = servletPath;
+        this.pathInfo = pathInfo;
+    }
 
-        if (i > 0 && urlPattern.charAt(i - 1) == '/') {
-            servletPath = urlPattern.substring(0, i - 1);
-            pathInfo = "/" + urlPattern.substring(i + 1);
-        }
+    public String setPath(String path) {
+        return request.setPath(path);
     }
 
     public String getParameter(String name) {
@@ -47,7 +38,7 @@ public class HttpServletRequest {
     }
 
     public RequestDispatcher getRequestDispatcher(String path) {
-        return null; //todo
+        return Server.getInstance().servletDispatcher.getRequestDispatcher(path);
     }
 
     public String getMethod() {

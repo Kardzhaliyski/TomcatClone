@@ -5,9 +5,9 @@ import static servlet.Utils.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import server.http.servlet.HttpServlet;
-import server.http.servlet.HttpServletRequest;
-import server.http.servlet.HttpServletResponse;
+import server.http.HttpServlet;
+import server.http.HttpServletRequest;
+import server.http.HttpServletResponse;
 import dao.Dao;
 import model.Comment;
 

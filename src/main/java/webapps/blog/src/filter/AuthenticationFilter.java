@@ -3,14 +3,13 @@ package filter;
 import java.io.IOException;
 
 import server.dispatcher.FilterChain;
-import server.http.servlet.HttpFilter;
-import server.http.servlet.HttpServletRequest;
-import server.http.servlet.HttpServletResponse;
-import model.AuthToken;
+import server.http.HttpFilter;
+import server.http.HttpServletRequest;
+import server.http.HttpServletResponse;
 import service.AuthenticationService;
 import servlet.Utils;
 
-import static server.http.servlet.HttpServletResponse.SC_UNAUTHORIZED;
+import static server.http.HttpServletResponse.SC_UNAUTHORIZED;
 
 public class AuthenticationFilter extends HttpFilter {
 

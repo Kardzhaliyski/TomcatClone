@@ -5,11 +5,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import server.http.HttpRequest;
-import server.http.servlet.HttpFilter;
-import server.http.servlet.HttpServlet;
-import server.http.servlet.HttpServletRequest;
-import server.http.servlet.HttpServletResponse;
+import server.http.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -22,9 +18,35 @@ import java.util.*;
 
 public class ServletDispatcher {
 
-    public static void main(String[] args) throws ParserConfigurationException, IOException, SAXException {
-        ServletDispatcher servletDispatcher = new ServletDispatcher("src/main/java/webapps/blog/web.xml");
-        //todo remove
+    private class ServletRequestDispatcher implements RequestDispatcher {
+        private String path;
+        public ServletRequestDispatcher(String path) {
+            this.path = path;
+        }
+
+        public void forward(HttpServletRequest req, HttpServletResponse resp) {
+            String normalizedPath = req.setPath(path);
+            ServletData data = getServletData(normalizedPath);
+
+            if (data.servletName == null) {
+                //todo return 404
+                return;
+            }
+
+            HttpServlet httpServlet = servlets.get(data.servletName);
+            if (httpServlet == null) {
+              //todo return 404
+              return;
+            }
+
+            HttpServletRequest newReq = new HttpServletRequest(req, data.servletPattern, data.pathInfo);
+
+            try {
+                httpServlet.service(newReq,resp);
+            } catch (IOException e) {
+                //todo log error
+            }
+        }
     }
 
     private static class NameClassPair {
@@ -32,7 +54,7 @@ public class ServletDispatcher {
         String className;
     }
 
-    private static class ServletInfo {
+    private static class ServletData {
         String servletName = null;
         String servletPattern = null;
         String pathInfo = null;
@@ -50,7 +72,6 @@ public class ServletDispatcher {
 
     private final Map<String, HttpFilter> filters = new HashMap<>();
     private final Map<String, HttpServlet> servlets = new HashMap<>();
-//    private final Set<FilterMapping> filterMappingSet = new LinkedHashSet<>();
     private final List<FilterMapping>  filterMappings = new ArrayList<>();
     private final Map<String, String> servletMapping = new LinkedHashMap<>();
 
@@ -76,8 +97,7 @@ public class ServletDispatcher {
 
     public void dispatch(HttpRequest request, Socket socket) throws IOException {
         FilterChain chain = getFilterChain(request.path);
-        ServletInfo data = new ServletInfo(); //todo fix name
-        getServletInfo(request.path, data);
+        ServletData data = getServletData(request.path);
 
         if (data.servletName == null) {
             //todo return 404
@@ -94,6 +114,10 @@ public class ServletDispatcher {
         HttpServletRequest req = new HttpServletRequest(request, data.servletPattern, data.pathInfo);
         HttpServletResponse res = new HttpServletResponse(request, socket.getOutputStream());
         chain.doFilter(req, res);
+    }
+
+    public RequestDispatcher getRequestDispatcher(String path) {
+        return new ServletRequestDispatcher(path);
     }
 
     private FilterChain getFilterChain(String path) {
@@ -136,7 +160,8 @@ public class ServletDispatcher {
         return chain;
     }
 
-    private void getServletInfo(String path, ServletInfo data) {
+    private ServletData getServletData(String path) {
+        ServletData data = new ServletData();
         for (Map.Entry<String, String> kvp : servletMapping.entrySet()) {
             String urlPattern = kvp.getValue();
             int i = urlPattern.indexOf("*");
@@ -167,6 +192,8 @@ public class ServletDispatcher {
                 //todo maybe throw exception
             }
         }
+
+        return data;
     }
 
     private void initObjects(List<NameClassPair> list) {

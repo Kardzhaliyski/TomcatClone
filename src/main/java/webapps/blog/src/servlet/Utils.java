@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import server.http.servlet.HttpServletResponse;
+import server.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.PrintWriter;

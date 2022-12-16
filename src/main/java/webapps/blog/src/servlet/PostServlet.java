@@ -1,14 +1,14 @@
 package servlet;
 
 import static servlet.Utils.*;
-import static server.http.servlet.HttpServletResponse.*;
+import static server.http.HttpServletResponse.*;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import server.http.servlet.HttpServlet;
-import server.http.servlet.HttpServletRequest;
-import server.http.servlet.HttpServletResponse;
-import server.http.servlet.RequestDispatcher;
+import server.http.HttpServlet;
+import server.http.HttpServletRequest;
+import server.http.HttpServletResponse;
+import server.http.RequestDispatcher;
 import dao.Dao;
 import model.Post;
 

@@ -17,16 +17,16 @@ public class HttpRequest {
         String line = readLine(in);
         String[] info = line.split(" ");
         method = info[0];
-        path = info[1];
-        path = extractParams(path);
-//        if (path.startsWith("/")) {
-//            path = path.substring(1);
-//        }
-        if(path.length() > 1 && path.endsWith("/")) {
-            path = path.substring(0, path.length() -1);
-        }
-
+        setPath(info[1]);
         protocol = info[2];
+
+        setHeaders(in);
+
+        reader = in;
+    }
+
+    private void setHeaders(InputStreamReader in) {
+        String line;
         while ((line = readLine(in)) != null) {
             if (line.isBlank()) {
                 break;
@@ -43,8 +43,18 @@ public class HttpRequest {
                 break;
             }
         }
+    }
 
-        reader = in;
+    String setPath(String path) {
+        path = extractParams(path);
+//        if (path.startsWith("/")) {
+//            path = path.substring(1);
+//        }
+        if(path.length() > 1 && path.endsWith("/")) {
+            path = path.substring(0, path.length() -1);
+        }
+
+        return this.path = path;
     }
 
     private String extractParams(String path) {

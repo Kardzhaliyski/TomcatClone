@@ -1,6 +1,4 @@
-package server.http.servlet;
-
-import server.http.HttpRequest;
+package server.http;
 
 import java.io.IOException;
 

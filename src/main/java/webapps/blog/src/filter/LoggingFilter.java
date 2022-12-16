@@ -4,9 +4,9 @@ package filter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import server.dispatcher.FilterChain;
-import server.http.servlet.HttpFilter;
-import server.http.servlet.HttpServletRequest;
-import server.http.servlet.HttpServletResponse;
+import server.http.HttpFilter;
+import server.http.HttpServletRequest;
+import server.http.HttpServletResponse;
 import model.AuthToken;
 import service.AuthenticationService;
 

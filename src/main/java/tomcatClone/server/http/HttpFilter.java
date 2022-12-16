@@ -1,4 +1,4 @@
-package server.http.servlet;
+package server.http;
 
 import server.dispatcher.FilterChain;
 

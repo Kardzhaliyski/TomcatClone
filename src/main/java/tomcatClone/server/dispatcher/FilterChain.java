@@ -1,9 +1,9 @@
 package server.dispatcher;
 
-import server.http.servlet.HttpFilter;
-import server.http.servlet.HttpServlet;
-import server.http.servlet.HttpServletRequest;
-import server.http.servlet.HttpServletResponse;
+import server.http.HttpFilter;
+import server.http.HttpServlet;
+import server.http.HttpServletRequest;
+import server.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
