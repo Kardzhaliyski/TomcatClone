@@ -20,7 +20,8 @@ public class HttpServletResponse {
     private Map<String, String> headers = new HashMap<>();
     private boolean serverAcceptGzip = false;
 //    private boolean headersSend = false;
-    private PrintWriter writer;
+    private OutputStream outputStream;
+    private PrintWriter writer = null;
 
     public HttpServletResponse(HttpRequest request, OutputStream outputStream) {
         this.protocol = request.protocol;
@@ -31,7 +32,13 @@ public class HttpServletResponse {
             this.serverAcceptGzip = true;
         }
 
-        writer = new PrintWriter(new OutputStreamWriter(outputStream));
+        this.outputStream = outputStream;
+        this.writer = new PrintWriter(new OutputStreamWriter(outputStream));
+    }
+
+    public OutputStream getOutputStream(){
+        sendHeaders();
+        return outputStream;
     }
 
     public PrintWriter getWriter() throws IOException {

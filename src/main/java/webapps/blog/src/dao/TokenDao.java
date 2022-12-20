@@ -32,4 +32,11 @@ public class TokenDao {
             mapper.addToken(token);
         }
     }
+
+    public boolean containsToken(String token) {
+        try (SqlSession session = sessionFactory.openSession(true)){
+            AuthTokenMapper mapper = session.getMapper(AuthTokenMapper.class);
+           return mapper.contains(token);
+        }
+    }
 }

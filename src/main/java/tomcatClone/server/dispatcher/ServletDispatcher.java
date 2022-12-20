@@ -6,6 +6,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import server.http.*;
+import server.http.servlet.StaticContentServlet;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,6 +21,7 @@ public class ServletDispatcher {
 
     private class ServletRequestDispatcher implements RequestDispatcher {
         private String path;
+
         public ServletRequestDispatcher(String path) {
             this.path = path;
         }
@@ -35,14 +37,14 @@ public class ServletDispatcher {
 
             HttpServlet httpServlet = servlets.get(data.servletName);
             if (httpServlet == null) {
-              //todo return 404
-              return;
+                //todo return 404
+                return;
             }
 
             HttpServletRequest newReq = new HttpServletRequest(req, data.servletPattern, data.pathInfo);
 
             try {
-                httpServlet.service(newReq,resp);
+                httpServlet.service(newReq, resp);
             } catch (IOException e) {
                 //todo log error
             }
@@ -72,7 +74,7 @@ public class ServletDispatcher {
 
     private final Map<String, HttpFilter> filters = new HashMap<>();
     private final Map<String, HttpServlet> servlets = new HashMap<>();
-    private final List<FilterMapping>  filterMappings = new ArrayList<>();
+    private final List<FilterMapping> filterMappings = new ArrayList<>();
     private final Map<String, String> servletMapping = new LinkedHashMap<>();
 
     public ServletDispatcher(String webXmlPath) throws ParserConfigurationException, IOException, SAXException {
@@ -100,15 +102,15 @@ public class ServletDispatcher {
         ServletData data = getServletData(request.path);
 
         if (data.servletName == null) {
-            //todo return 404
-            return;
-        }
-
-        HttpServlet httpServlet = servlets.get(data.servletName);
-        if (httpServlet != null) {
-            chain.setServlet(httpServlet);
+            chain.setServlet(new StaticContentServlet());
         } else {
-            //todo log error
+            HttpServlet httpServlet = servlets.get(data.servletName);
+            if (httpServlet != null) {
+                chain.setServlet(httpServlet);
+            } else {
+                // return 404
+                //todo log error
+            }
         }
 
         HttpServletRequest req = new HttpServletRequest(request, data.servletPattern, data.pathInfo);
@@ -193,6 +195,10 @@ public class ServletDispatcher {
             }
         }
 
+        if(data.servletName == null) {
+            data.pathInfo = path;
+        }
+
         return data;
     }
 
@@ -273,20 +279,20 @@ public class ServletDispatcher {
             }
 
             String urlPattern = getTextFromTag(elem, "url-pattern");
-            if(urlPattern != null) {
+            if (urlPattern != null) {
                 FilterMapping pair = new FilterMapping(filterName, urlPattern);
                 filterMappings.add(pair);
                 continue;
             }
 
             String servletName = getTextFromTag(elem, "servlet-name");
-            if(servletName == null) {
+            if (servletName == null) {
                 //todo log error
                 continue;
             }
 
             String pattern = servletMapping.get(servletName);
-            if(pattern == null) {
+            if (pattern == null) {
                 //todo log error
                 continue;
             }

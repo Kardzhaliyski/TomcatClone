@@ -36,6 +36,9 @@ public class HttpServletRequest {
     public String getPathInfo() {
         return pathInfo;
     }
+    public String getProtocol() {
+        return request.protocol;
+    }
 
     public RequestDispatcher getRequestDispatcher(String path) {
         return Server.getInstance().servletDispatcher.getRequestDispatcher(path);

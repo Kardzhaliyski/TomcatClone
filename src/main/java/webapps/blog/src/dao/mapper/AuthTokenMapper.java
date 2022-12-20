@@ -10,4 +10,7 @@ public interface AuthTokenMapper {
 
     @Insert("INSERT INTO tokens(token, username, created_date, expiration_date) VALUES (#{token}, #{uname}, #{createdDate}, #{expirationDate})")
     public void addToken(AuthToken token);
+
+    @Select("SELECT count(token) > 0 FROM tokens WHERE token = #{token}")
+    boolean contains(String token);
 }

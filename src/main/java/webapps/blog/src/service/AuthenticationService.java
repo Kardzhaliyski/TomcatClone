@@ -59,7 +59,7 @@ public class AuthenticationService {
         String token;
         do {
             token = DigestUtils.sha1Hex(username + "$" + salt);
-        } while (dao.getToken(token) != null); //todo make containsToken()
+        } while (dao.containsToken(token));
         AuthToken authToken = new AuthToken(username, token);
         dao.addToken(authToken);
         tokenMap.put(token, authToken);
