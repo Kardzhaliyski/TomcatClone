@@ -1,6 +1,7 @@
 package server.http;
 
 import server.ServletContext;
+import servlet.Utils;
 
 import java.io.IOException;
 
@@ -14,16 +15,16 @@ public class HttpServlet {
 
     protected void init() {}
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        //todo add base implementation
+        Utils.writeErrorAsJson(resp,405, "Method not supported");
     }
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        //todo sent back method not supported code
+        Utils.writeErrorAsJson(resp,405, "Method not supported");
     }
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        //todo sent back method not supported code
+        Utils.writeErrorAsJson(resp,405, "Method not supported");
     }
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        //todo sent back method not supported code
+        Utils.writeErrorAsJson(resp,405, "Method not supported");
     }
 
     public void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -33,7 +34,7 @@ public class HttpServlet {
             case "PUT" -> doPut(req,resp);
             case "DELETE" -> doDelete(req, resp);
             default -> {
-                return;//todo sent back method not supported code
+                Utils.writeErrorAsJson(resp,405, "Method not supported");
             }
         }
     }

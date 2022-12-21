@@ -19,9 +19,9 @@ public class HttpServletResponse {
     public StatusCode statusCode;
     private Map<String, String> headers = new HashMap<>();
     private boolean serverAcceptGzip = false;
-//    private boolean headersSend = false;
     private OutputStream outputStream;
     private PrintWriter writer = null;
+    private boolean headersSend = false;
 
     public HttpServletResponse(HttpRequest request, OutputStream outputStream) {
         this.protocol = request.protocol;
@@ -37,16 +37,23 @@ public class HttpServletResponse {
     }
 
     public OutputStream getOutputStream(){
-        sendHeaders();
+        if(!headersSend) {
+            sendHeaders();
+        }
+
         return outputStream;
     }
 
     public PrintWriter getWriter() throws IOException {
-        sendHeaders();
+        if(!headersSend) {
+            sendHeaders();
+        }
+
         return writer;
     }
 
     private void sendHeaders() {
+        headersSend = true;
         StringBuilder sb = new StringBuilder();
         appendStatusLine(sb);
         addHeaders();

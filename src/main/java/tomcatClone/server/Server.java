@@ -73,6 +73,7 @@ public class Server {
             Utils.writeHttpResponseAsJson(socket.getOutputStream(), 404, "Resource not found");
             return;
         }
+
         request.path = request.path.substring(servletPath.length() + 1);
         context.dispatcher.dispatch(request, socket);
     }

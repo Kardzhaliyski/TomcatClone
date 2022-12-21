@@ -11,7 +11,7 @@ public class ServletContext {
     public ServletDispatcher dispatcher;
     public Path root;
     public boolean showDirectoryContent;
-    private HttpServlet staticContentServlet = null;
+    private HttpServlet staticContentServlet = null;// /blog/index.html
 
     public ServletContext(String path, ServletDispatcher dispatcher, String root) {
         this.path = path;
