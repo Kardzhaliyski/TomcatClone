@@ -1,6 +1,7 @@
 package server.http;
 
 import server.Server;
+import server.ServletContext;
 
 import java.io.Reader;
 
@@ -41,7 +42,7 @@ public class HttpServletRequest {
     }
 
     public RequestDispatcher getRequestDispatcher(String path) {
-        return Server.getInstance().servletDispatcher.getRequestDispatcher(path);
+        return Server.getInstance().getDispatcher(path).getRequestDispatcher(path);
     }
 
     public String getMethod() {
@@ -55,4 +56,6 @@ public class HttpServletRequest {
     public String getHeader(String name) {
         return request.headers.get(name);
     }
+
+
 }

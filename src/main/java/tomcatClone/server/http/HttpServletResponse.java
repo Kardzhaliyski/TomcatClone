@@ -69,6 +69,10 @@ public class HttpServletResponse {
         headers.put(name, value);
     }
 
+    public void setHeader(String name, String value) {
+        headers.put(name, value);
+    }
+
     public void sendRedirect(String path) {
         //todo
     }

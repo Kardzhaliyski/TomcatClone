@@ -2,9 +2,22 @@ package server;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 import server.dispatcher.ServletDispatcher;
 import server.utils.CliOptions;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class ServerBuilder {
@@ -17,9 +30,67 @@ public class ServerBuilder {
     private boolean showDirectoryContent = false;
     private String root = DEFAULT_DIRECTORY;
     private Set<Option> options = null;
-    private ServletDispatcher servletDispatcher = null;
+    private Map<String, ServletContext> contexts = new HashMap<>();
+
 
     public ServerBuilder() {
+    }
+
+    public ServerBuilder(String serverXml) {
+        Path xmlPath = Path.of("src/main/resources/server.xml");
+        File xmlFile = xmlPath.toFile();
+        if (!xmlFile.exists()) {
+            System.err.println("Server.xml not found");
+            System.exit(7);
+        }
+
+        DocumentBuilder documentBuilder = null;
+        try {
+            documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+
+        Document doc;
+        try {
+            doc = documentBuilder.parse(xmlFile);
+        } catch (SAXException | IOException e) {
+            throw new RuntimeException("Error while parsing Server.xml file", e);
+        }
+
+        Node connector = doc.getElementsByTagName("Connector").item(0);
+        Node portNode = connector.getAttributes().getNamedItem("port");
+        int port = Integer.parseInt(portNode.getNodeValue());
+
+        NodeList contextList = doc.getElementsByTagName("Context");
+        for (int i = 0; i < contextList.getLength(); i++) {
+            Node contextNode = contextList.item(i);
+            NamedNodeMap attributes = contextNode.getAttributes();
+            Node pathNode = attributes.getNamedItem("path");
+            if (pathNode == null) {
+                System.out.println("Invalid context element. Couldn't find path attribute.");
+                continue;
+            }
+
+
+            Node docBaseNode = attributes.getNamedItem("docBase");
+            if (docBaseNode == null) {
+                System.out.println("Invalid context element. Couldn't find docBase attribute.");
+            }
+
+            String pathStr = pathNode.getNodeValue();
+            String docBase = docBaseNode.getNodeValue();
+            ServletDispatcher dispatcher = null;
+            try {
+                dispatcher = new ServletDispatcher(Path.of(docBase, "web.xml"));
+            } catch (ParserConfigurationException | SAXException | IOException e) {
+                e.printStackTrace();
+                continue;
+            }
+
+            ServletContext servletContext = new ServletContext(pathStr, dispatcher, docBase);
+            contexts.put(pathStr, servletContext);
+        }
     }
 
     public ServerBuilder(CommandLine cli) {
@@ -47,7 +118,7 @@ public class ServerBuilder {
     }
 
     public Server build() {
-        return new Server(root, port, threadCount, showDirectoryContent, options, servletDispatcher);
+        return new Server(root, port, threadCount, showDirectoryContent, options, contexts);
     }
 
     public ServerBuilder setPort(int port) {
@@ -70,8 +141,8 @@ public class ServerBuilder {
         return this;
     }
 
-    public ServerBuilder setServletDispatcher(ServletDispatcher dispatcher) {
-        this.servletDispatcher = dispatcher;
+    public ServerBuilder addContext(ServletContext context) {
+        contexts.put(context.path, context);
         return this;
     }
 }

@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 
 public class PostServlet extends HttpServlet {
 
-//    Pattern GET_PATH_PATTERN = Pattern.compile("/([0-9]+)(?:(/comments)|/)?");
     Pattern GET_PATH_PATTERN = Pattern.compile("\\/([0-9]+)(?:(\\/comments)|\\/)?");
     Pattern DELETE_PUT_PATH_PATTERN = Pattern.compile("/([0-9]+)/?");
     Dao dao;

@@ -5,6 +5,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import server.ServletContext;
 import server.http.*;
 import server.http.servlet.StaticContentServlet;
 
@@ -15,9 +16,12 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
+import java.nio.file.Path;
 import java.util.*;
 
 public class ServletDispatcher {
+
+    private ServletContext servletContext;
 
     private class ServletRequestDispatcher implements RequestDispatcher {
         private String path;
@@ -41,7 +45,7 @@ public class ServletDispatcher {
                 return;
             }
 
-            HttpServletRequest newReq = new HttpServletRequest(req, data.servletPattern, data.pathInfo);
+            HttpServletRequest newReq = new HttpServletRequest(req, data.servletPath, data.pathInfo);
 
             try {
                 httpServlet.service(newReq, resp);
@@ -58,7 +62,7 @@ public class ServletDispatcher {
 
     private static class ServletData {
         String servletName = null;
-        String servletPattern = null;
+        String servletPath = null;
         String pathInfo = null;
     }
 
@@ -77,9 +81,9 @@ public class ServletDispatcher {
     private final List<FilterMapping> filterMappings = new ArrayList<>();
     private final Map<String, String> servletMapping = new LinkedHashMap<>();
 
-    public ServletDispatcher(String webXmlPath) throws ParserConfigurationException, IOException, SAXException {
+    public ServletDispatcher(Path webXmlPath) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        Document doc = documentBuilder.parse(webXmlPath); //todo maybe change
+        Document doc = documentBuilder.parse(webXmlPath.toFile());
 
         NodeList fn = doc.getElementsByTagName("filter");
         List<NameClassPair> filtersData = parseFilters(fn);
@@ -94,7 +98,10 @@ public class ServletDispatcher {
 
         NodeList fmn = doc.getElementsByTagName("filter-mapping");
         parseFilterMappings(fmn);
+    }
 
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
     }
 
     public void dispatch(HttpRequest request, Socket socket) throws IOException {
@@ -102,7 +109,7 @@ public class ServletDispatcher {
         ServletData data = getServletData(request.path);
 
         if (data.servletName == null) {
-            chain.setServlet(new StaticContentServlet());
+            chain.setServlet(servletContext.getStaticContentServlet());
         } else {
             HttpServlet httpServlet = servlets.get(data.servletName);
             if (httpServlet != null) {
@@ -113,7 +120,7 @@ public class ServletDispatcher {
             }
         }
 
-        HttpServletRequest req = new HttpServletRequest(request, data.servletPattern, data.pathInfo);
+        HttpServletRequest req = new HttpServletRequest(request, data.servletPath, data.pathInfo);
         HttpServletResponse res = new HttpServletResponse(request, socket.getOutputStream());
         chain.doFilter(req, res);
     }
@@ -164,16 +171,16 @@ public class ServletDispatcher {
 
     private ServletData getServletData(String path) {
         ServletData data = new ServletData();
-        for (Map.Entry<String, String> kvp : servletMapping.entrySet()) {
-            String urlPattern = kvp.getValue();
+        for (Map.Entry<String, String> entry : servletMapping.entrySet()) {
+            String urlPattern = entry.getValue();
             int i = urlPattern.indexOf("*");
             if (i == -1) {
                 if (!path.equals(urlPattern)) {
                     continue;
                 }
 
-                data.servletName = kvp.getKey();
-                data.servletPattern = urlPattern;
+                data.servletName = entry.getKey();
+                data.servletPath = urlPattern;
                 break;
             }
 
@@ -181,8 +188,8 @@ public class ServletDispatcher {
             if (i > 0 && urlPattern.charAt(i - 1) == '/') {
                 String sp = urlPattern.substring(0, i - 1);
                 if (path.startsWith(sp)) {
-                    data.servletName = kvp.getKey();
-                    data.servletPattern = sp;
+                    data.servletName = entry.getKey();
+                    data.servletPath = sp;
                     data.pathInfo = path.substring(i - 1);
                     if (data.pathInfo.isEmpty()) {
                         data.pathInfo = null;
@@ -195,7 +202,7 @@ public class ServletDispatcher {
             }
         }
 
-        if(data.servletName == null) {
+        if (data.servletName == null) {
             data.pathInfo = path;
         }
 
@@ -220,8 +227,10 @@ public class ServletDispatcher {
 
                 if (instance instanceof HttpServlet servlet) {
                     servlets.put(name, servlet);
+                    servlet.setServletContext(this.servletContext);
                 } else if (instance instanceof HttpFilter filter) {
                     filters.put(name, filter);
+                    filter.setServletContext(this.servletContext);
                 }
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException("Class not found with name: " + className, e);

@@ -41,6 +41,7 @@ public class CommentServlet extends HttpServlet {
         int id = Integer.parseInt(postId);
         Comment[] comments = dao.getAllCommentsForPost(id);
         writeAsJson(resp, comments);
+
     }
 
     private boolean isPositiveNumber(String str) {

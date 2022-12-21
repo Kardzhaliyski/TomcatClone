@@ -23,7 +23,7 @@ public class HttpTask implements Runnable {
             InputStream inputStream = socket.getInputStream();
             HttpRequest request = new HttpRequest(inputStream);
             log(request);
-            server.servletDispatcher.dispatch(request, socket);
+            server.dispatch(request, socket);
 
 
 //            HttpResponse response;

@@ -1,6 +1,7 @@
 package server.http.servlet;
 
 import server.Server;
+import server.ServletContext;
 import server.http.*;
 import server.utils.Gzip;
 
@@ -18,7 +19,7 @@ public class StaticContentServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        handle(Server.getInstance(), req);
+        handle(req);
         if(body == null && bodyFile == null) {
             //todo return 404
             return;
@@ -38,8 +39,9 @@ public class StaticContentServlet extends HttpServlet {
         sendBody(resp.getOutputStream());
     }
 
-    public void handle(Server server, HttpServletRequest request) throws IOException {
-        Path root = server.root;
+    public void handle(HttpServletRequest request) throws IOException {
+
+        Path root = getServletContext().root;
         String pathInfo = request.getPathInfo();
         if(pathInfo.startsWith("/")) {
             pathInfo = pathInfo.substring(1);
@@ -58,19 +60,20 @@ public class StaticContentServlet extends HttpServlet {
                 return;
             }
 
-            handleDirectory(server, request, dest);
+            handleDirectory(request, dest);
             return;
         }
 
         bodyFile = dest;
     }
 
-    private void handleDirectory(Server server, HttpServletRequest request, File dest) throws IOException {
+    private void handleDirectory( HttpServletRequest request, File dest) throws IOException {
 //        if (!request.path.isBlank() && !request.path.endsWith("/")) {
 //            return HttpResponseFactory.redirect(request.protocol, "/" + request.path + "/");
 //        }
 
-        if (server.showDirectoryContent) {
+        ServletContext context = getServletContext();
+        if (context.showDirectoryContent) {
             File[] files = dest.listFiles();
             body = Arrays.stream(files)
                     .map(f -> String.format("<a href=\"%s/\">%s</a>",

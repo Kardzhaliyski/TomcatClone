@@ -1,8 +1,12 @@
 package server.http;
 
+import server.ServletContext;
+
 import java.io.IOException;
 
 public class HttpServlet {
+    private ServletContext servletContext = null;
+
 
     public HttpServlet() {
         init();
@@ -34,5 +38,11 @@ public class HttpServlet {
         }
     }
 
+    public ServletContext getServletContext() {
+        return servletContext;
+    }
 
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
+    }
 }
