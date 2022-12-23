@@ -1,6 +1,6 @@
 package com.github.kardzhaliyski.tomcatclone.http.servlet;
 
-import com.github.kardzhaliyski.tomcatclone.ServletContext;
+import com.github.kardzhaliyski.tomcatclone.server.ServletContext;
 import com.github.kardzhaliyski.tomcatclone.http.HttpServlet;
 import com.github.kardzhaliyski.tomcatclone.http.HttpServletRequest;
 import com.github.kardzhaliyski.tomcatclone.http.HttpServletResponse;

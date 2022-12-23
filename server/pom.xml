@@ -13,6 +13,7 @@
     <groupId>com.github.kardzhaliyski</groupId>
     <artifactId>tomcatclone</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     <properties>
         <maven.compiler.source>19</maven.compiler.source>

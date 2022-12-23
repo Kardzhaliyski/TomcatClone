@@ -1,6 +1,6 @@
 package com.github.kardzhaliyski.tomcatclone.http;
 
-import com.github.kardzhaliyski.tomcatclone.Server;
+import com.github.kardzhaliyski.tomcatclone.server.Server;
 import com.github.kardzhaliyski.tomcatclone.utils.StatusCode;
 
 import java.io.IOException;

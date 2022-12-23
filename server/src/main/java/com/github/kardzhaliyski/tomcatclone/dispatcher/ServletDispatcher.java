@@ -1,20 +1,25 @@
 package com.github.kardzhaliyski.tomcatclone.dispatcher;
 
+import com.github.kardzhaliyski.tomcatclone.utils.PathParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import com.github.kardzhaliyski.tomcatclone.ServletContext;
+import com.github.kardzhaliyski.tomcatclone.server.ServletContext;
 import com.github.kardzhaliyski.tomcatclone.http.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -23,31 +28,26 @@ public class ServletDispatcher {
     private ServletContext servletContext;
 
     private class ServletRequestDispatcher implements RequestDispatcher {
-        private String path;
+        private HttpServlet servlet;
+        private ServletData servletData;
+        private PathData pathData;
 
-        public ServletRequestDispatcher(String path) {
-            this.path = path;
+        public ServletRequestDispatcher( HttpServlet servlet, ServletData servletData, PathData pathData) {
+            this.servlet = servlet;
+            this.servletData = servletData;
+            this.pathData = pathData;
         }
 
         public void forward(HttpServletRequest req, HttpServletResponse resp) {
-            String normalizedPath = req.setPath(path);
-            ServletData data = getServletData(normalizedPath);
+            HttpServletRequest newRequest = new HttpServletRequest(req);
+            newRequest.setPathInfo(servletData.pathInfo);
+            newRequest.setServletPath(servletData.servletPath);
+            newRequest.setPath(pathData.path);
+            newRequest.setParams(pathData.params);
 
-            if (data.servletName == null) {
-                //todo return 404
-                return;
-            }
-
-            HttpServlet httpServlet = servlets.get(data.servletName);
-            if (httpServlet == null) {
-                //todo return 404
-                return;
-            }
-
-            HttpServletRequest newReq = new HttpServletRequest(req, data.servletPath, data.pathInfo);
-
+            //todo clear outputStream
             try {
-                httpServlet.service(newReq, resp);
+                servlet.service(newRequest, resp);
             } catch (IOException e) {
                 //todo log error
             }
@@ -80,17 +80,17 @@ public class ServletDispatcher {
     private final List<FilterMapping> filterMappings = new ArrayList<>();
     private final Map<String, String> servletMapping = new LinkedHashMap<>();
 
-    public ServletDispatcher(Path webXmlPath) throws ParserConfigurationException, IOException, SAXException {
-        DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        Document doc = documentBuilder.parse(webXmlPath.toFile());
-
+    public ServletDispatcher(ClassLoader cl, Document doc) throws ParserConfigurationException, IOException, SAXException {
+//        DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+//        Document doc = documentBuilder.parse(webXmlDir.resolve("web.xml").toFile());
+//        documentBuilder.
         NodeList fn = doc.getElementsByTagName("filter");
         List<NameClassPair> filtersData = parseFilters(fn);
-        initObjects(filtersData);
+        initObjects(cl, filtersData);
 
         NodeList sn = doc.getElementsByTagName("servlet");
         List<NameClassPair> servletsData = parseServlets(sn);
-        initObjects(servletsData);
+        initObjects(cl, servletsData);
 
         NodeList smn = doc.getElementsByTagName("servlet-mapping");
         parseServletMappings(smn);
@@ -125,8 +125,18 @@ public class ServletDispatcher {
     }
 
     public RequestDispatcher getRequestDispatcher(String path) {
-        return new ServletRequestDispatcher(path);
+        PathData pathData = PathParser.parse(path);
+        ServletData servletData = getServletData(pathData.path);
+
+        if (servletData.servletName == null) {
+            return null;
+        }
+
+        HttpServlet httpServlet = servlets.get(servletData.servletName);
+        assert httpServlet != null;
+        return new ServletRequestDispatcher(httpServlet, servletData, pathData);
     }
+
 
     private FilterChain getFilterChain(String path) {
         FilterChain chain = new FilterChain();
@@ -208,7 +218,7 @@ public class ServletDispatcher {
         return data;
     }
 
-    private void initObjects(List<NameClassPair> list) {
+    private void initObjects(ClassLoader cl, List<NameClassPair> list) {
         for (NameClassPair pair : list) {
             String name = pair.name;
             String className = pair.className;
@@ -219,25 +229,28 @@ public class ServletDispatcher {
                 //todo log instead of throw
             }
 
-            try {
-                Class<?> clazz = Class.forName(className);
-                Constructor<?> constructor = clazz.getConstructor();
-                Object instance = constructor.newInstance();
 
-                if (instance instanceof HttpServlet servlet) {
-                    servlets.put(name, servlet);
-                    servlet.setServletContext(this.servletContext);
-                } else if (instance instanceof HttpFilter filter) {
-                    filters.put(name, filter);
-                    filter.setServletContext(this.servletContext);
+                try {
+                    Class<?> clazz = cl.loadClass(className);
+//                                    Class<?> clazz = Class.forName(className);
+                    Constructor<?> constructor = clazz.getConstructor();
+                    Object instance = constructor.newInstance();
+
+                    if (instance instanceof HttpServlet servlet) {
+                        servlets.put(name, servlet);
+                        servlet.setServletContext(this.servletContext);
+                    } else if (instance instanceof HttpFilter filter) {
+                        filters.put(name, filter);
+                        filter.setServletContext(this.servletContext);
+                    }
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException("Class not found with name: " + className, e);
+                } catch (NoSuchMethodException e) {
+                    throw new RuntimeException("No public empty constructor for: " + name, e);
+                } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+                    throw new RuntimeException("Couldn't make instance of class: " + name, e);
                 }
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException("Class not found with name: " + className, e);
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException("No public empty constructor for: " + name, e);
-            } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException("Couldn't make instance of class: " + name, e);
-            }
+
         }
     }
 

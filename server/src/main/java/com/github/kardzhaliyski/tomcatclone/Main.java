@@ -1,5 +1,7 @@
 package com.github.kardzhaliyski.tomcatclone;
 
+import com.github.kardzhaliyski.tomcatclone.server.Server;
+import com.github.kardzhaliyski.tomcatclone.server.ServerBuilder;
 import org.apache.commons.cli.*;
 import com.github.kardzhaliyski.tomcatclone.utils.CliOptions;
 
@@ -21,7 +23,7 @@ public class Main {
 //            return;
 //        }
 
-        ServerBuilder builder = new ServerBuilder("src/main/resources/server.xml");
+        ServerBuilder builder = new ServerBuilder("server/src/main/resources/server.xml");
         Server server = builder.build();
         server.start();
     }

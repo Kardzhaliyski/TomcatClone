@@ -2,6 +2,7 @@
 <Server>
     <Connector port="80" protocol="HTTP/1.1"/>
     <Host name="localhost">
-        <Context path="blog" reloadable="true" docBase="M:\Archive\Git\TomcatClone\src\main\java\webapps\blog"/>
+<!--        <Context path="blog" reloadable="true" docBase="M:\Archive\Git\TomcatClone\webapps\blog\src\main\webapp\"/>-->
+        <Webapps base="C:\Users\Zdravko\Desktop\wars"/>
     </Host>
 </Server>

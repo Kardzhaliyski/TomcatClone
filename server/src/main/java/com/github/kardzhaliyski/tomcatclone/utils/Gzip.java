@@ -1,6 +1,6 @@
 package com.github.kardzhaliyski.tomcatclone.utils;
 
-import com.github.kardzhaliyski.tomcatclone.Server;
+import com.github.kardzhaliyski.tomcatclone.server.Server;
 
 import java.io.*;
 import java.nio.file.Path;

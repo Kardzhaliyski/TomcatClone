@@ -1,8 +1,9 @@
 package com.github.kardzhaliyski.tomcatclone.http;
 
-import com.github.kardzhaliyski.tomcatclone.Server;
+import com.github.kardzhaliyski.tomcatclone.server.Server;
 
 import java.io.Reader;
+import java.util.Map;
 
 public class HttpServletRequest {
     private final HttpRequest request;
@@ -15,14 +16,14 @@ public class HttpServletRequest {
         this.pathInfo = pathInfo;
     }
 
-    public HttpServletRequest(HttpServletRequest request, String servletPath, String pathInfo) {
-        this.request = request.request;
-        this.servletPath = servletPath;
-        this.pathInfo = pathInfo;
+    public HttpServletRequest(HttpServletRequest req) {
+        this.request = req.request;
+        this.servletPath = getServletPath();
+        this.pathInfo = getPathInfo();
     }
 
-    public String setPath(String path) {
-        return request.setPath(path);
+    public void setPath(String path) {
+        request.setPath(path);
     }
 
     public String getParameter(String name) {
@@ -41,7 +42,7 @@ public class HttpServletRequest {
     }
 
     public RequestDispatcher getRequestDispatcher(String path) {
-        return Server.getInstance().getDispatcher(path).getRequestDispatcher(path);
+        return Server.getInstance().getRequestDispatcher(path);
     }
 
     public String getMethod() {
@@ -57,4 +58,15 @@ public class HttpServletRequest {
     }
 
 
+    public void setPathInfo(String pathInfo) {
+        this.pathInfo = pathInfo;
+    }
+
+    public void setServletPath(String servletPath) {
+        this.servletPath = servletPath;
+    }
+
+    public void setParams(Map<String, String> params) {
+        this.request.params = params;
+    }
 }

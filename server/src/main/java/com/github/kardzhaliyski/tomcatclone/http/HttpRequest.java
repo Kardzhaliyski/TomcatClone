@@ -1,5 +1,8 @@
 package com.github.kardzhaliyski.tomcatclone.http;
 
+import com.github.kardzhaliyski.tomcatclone.dispatcher.PathData;
+import com.github.kardzhaliyski.tomcatclone.utils.PathParser;
+
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,47 +48,11 @@ public class HttpRequest {
         }
     }
 
-    String setPath(String path) {
-        path = extractParams(path);
-//        if (path.startsWith("/")) {
-//            path = path.substring(1);
-//        }
-        if(path.length() > 1 && path.endsWith("/")) {
-            path = path.substring(0, path.length() -1);
-        }
+    void setPath(String path) {
+        PathData parse = PathParser.parse(path);
 
-        return this.path = path;
-    }
-
-    private String extractParams(String path) {
-        int i = path.indexOf("#");
-        if (i != -1) {
-            path = path.substring(0, i);
-        }
-
-        i = path.indexOf("?");
-        if (i == -1) {
-            return path;
-        }
-
-        String queryString = path.substring(i + 1);
-        for (String s : queryString.split("&")) {
-            String[] split = s.split("=");
-            if(split.length < 2) {
-                break;
-            }
-
-            String key = split[0];
-            String value = split[1];
-
-            if(key == null || value == null || key.isBlank() || value.isBlank()){
-                continue;
-            }
-
-            params.put(key, value);
-        }
-
-        return path.substring(0, i);
+        this.path = parse.path;
+        this.params = parse.params;
     }
 
     private StringBuilder rlSb;
