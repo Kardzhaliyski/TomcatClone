@@ -3,6 +3,7 @@ package com.github.kardzhaliyski.tomcatclone.server;
 import com.github.kardzhaliyski.tomcatclone.dispatcher.ServletDispatcher;
 import com.github.kardzhaliyski.tomcatclone.http.*;
 import com.github.kardzhaliyski.tomcatclone.http.servlet.StaticContentServlet;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -11,20 +12,19 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ServletContext {
+    private static final Random random = new Random();
     public ServletDispatcher dispatcher;
     public Path root;
     public boolean showDirectoryContent;
-    private HttpServlet staticContentServlet = null;// /blog/index.html
+    private HttpServlet staticContentServlet = null;
+    private final Map<String, HttpSession> sessions = new HashMap<>();
 
     public ServletContext(String path, ServletDispatcher dispatcher, String root) {
         this.dispatcher = dispatcher;
@@ -51,15 +51,15 @@ public class ServletContext {
 //        ClassLoader prevCL = Thread.currentThread().getContextClassLoader();
 //        try {
 //            Thread.currentThread().setContextClassLoader(urlClassLoader);
-            this.dispatcher = new ServletDispatcher(urlClassLoader, webXml);
-            this.dispatcher.setServletContext(this);
+        this.dispatcher = new ServletDispatcher(urlClassLoader, webXml);
+        this.dispatcher.setServletContext(this);
 //        } finally {
 //            Thread.currentThread().setContextClassLoader(prevCL);
 //        }
     }
 
     public HttpServlet getStaticContentServlet() {
-        if(staticContentServlet == null) {
+        if (staticContentServlet == null) {
             staticContentServlet = new StaticContentServlet();
             staticContentServlet.setServletContext(this);
         }
@@ -67,11 +67,31 @@ public class ServletContext {
         return staticContentServlet;
     }
 
-    public void dispatch(HttpRequest request, Socket socket) throws IOException {
+    public void dispatch(HttpServletRequest request, Socket socket) throws IOException {
         dispatcher.dispatch(request, socket);
     }
 
     public RequestDispatcher getRequestDispatcher(String path) {
         return dispatcher.getRequestDispatcher(path);
+    }
+
+    public HttpSession getSession(String value) {
+        return sessions.get(value);
+    }
+
+    public HttpSession createSession() {
+        String id = generateSessionId();
+        HttpSession hs = new HttpSession(id);
+        sessions.put(id, hs);
+        return hs;
+    }
+
+    public String generateSessionId() {
+        int salt = random.nextInt();
+        String id;
+        do {
+            id = DigestUtils.sha1Hex(String.valueOf(salt));
+        } while (sessions.containsKey(id));
+        return id;
     }
 }

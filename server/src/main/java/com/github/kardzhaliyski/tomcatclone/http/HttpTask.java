@@ -23,7 +23,7 @@ public class HttpTask implements Runnable {
     public void run() {
         try {
             InputStream inputStream = socket.getInputStream();
-            HttpRequest request = new HttpRequest(inputStream);
+            HttpServletRequest request = new HttpServletRequest(inputStream);
             log(request);
             server.dispatch(request, socket);
         } catch (IOException e) {
@@ -46,7 +46,7 @@ public class HttpTask implements Runnable {
                 errorCode.getMessage());
     }
 
-    private void log(HttpRequest request) {
+    private void log(HttpServletRequest request) {
         System.out.printf("[%s] \"%s %s\" \"%s\"%n",
                 Instant.now().toString(),
                 request.method,

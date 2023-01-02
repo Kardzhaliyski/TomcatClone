@@ -4,7 +4,6 @@ import com.github.kardzhaliyski.tomcatclone.http.RequestDispatcher;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.cli.Option;
-import com.github.kardzhaliyski.tomcatclone.http.HttpRequest;
 import com.github.kardzhaliyski.tomcatclone.http.HttpServletRequest;
 import com.github.kardzhaliyski.tomcatclone.http.HttpTask;
 
@@ -65,7 +64,7 @@ public class Server {
         return instance;
     }
 
-    public void dispatch(HttpRequest request, Socket socket) throws IOException {
+    public void dispatch(HttpServletRequest request, Socket socket) throws IOException {
         Matcher matcher = PATH_MATCHING_PATTERN.matcher(request.path);
         if(!matcher.matches()) {
             writeHttpResponseAsJson(socket.getOutputStream(), 400, "Invalid request path");
@@ -80,7 +79,6 @@ public class Server {
         }
 
         request.path = request.path.substring(servletPath.length() + 1);
-//        context.dispatcher.dispatch(request, socket);
         context.dispatch(request, socket);
     }
 

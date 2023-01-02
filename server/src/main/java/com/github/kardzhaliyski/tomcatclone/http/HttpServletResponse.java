@@ -1,12 +1,12 @@
 package com.github.kardzhaliyski.tomcatclone.http;
 
-import com.github.kardzhaliyski.tomcatclone.http.HttpRequest;
 import com.github.kardzhaliyski.tomcatclone.utils.StatusCode;
 
 import java.io.*;
-import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HttpServletResponse {
@@ -17,13 +17,16 @@ public class HttpServletResponse {
 
     public String protocol;
     public StatusCode statusCode;
+    private final HttpServletRequest request;
     private Map<String, String> headers = new HashMap<>();
     private boolean serverAcceptGzip = false;
     private OutputStream outputStream;
     private PrintWriter writer = null;
     private boolean headersSend = false;
+    private List<Cookie> cookies = null;
 
-    public HttpServletResponse(HttpRequest request, OutputStream outputStream) {
+    public HttpServletResponse(HttpServletRequest request, OutputStream outputStream) {
+        this.request = request;
         this.protocol = request.protocol;
         this.statusCode = StatusCode.OK;
 
@@ -36,8 +39,8 @@ public class HttpServletResponse {
         this.writer = new PrintWriter(new OutputStreamWriter(outputStream));
     }
 
-    public OutputStream getOutputStream(){
-        if(!headersSend) {
+    public OutputStream getOutputStream() {
+        if (!headersSend) {
             sendHeaders();
         }
 
@@ -45,7 +48,7 @@ public class HttpServletResponse {
     }
 
     public PrintWriter getWriter() throws IOException {
-        if(!headersSend) {
+        if (!headersSend) {
             sendHeaders();
         }
 
@@ -58,9 +61,40 @@ public class HttpServletResponse {
         appendStatusLine(sb);
         addHeaders();
         appendHeaders(sb);
+        appendCookies(sb);
         sb.append(System.lineSeparator());
         writer.write(sb.toString());
         writer.flush();
+    }
+
+    private void appendCookies(StringBuilder sb) {
+        if(cookies == null) {
+            return;
+        }
+
+        for (Cookie cookie : cookies) {
+            sb.append("Set-Cookie: ");
+            sb.append(cookie.name).append("=").append(cookie.value);
+            appendCookieAttributes(sb, cookie);
+            sb.append(System.lineSeparator());
+        }
+    }
+
+    private static void appendCookieAttributes(StringBuilder sb, Cookie cookie) {
+        for (Map.Entry<String, String> attribute : cookie.getAttributes().entrySet()) {
+            String name = attribute.getKey();
+            String value = attribute.getValue();
+
+            if (name.equalsIgnoreCase("secure") || name.equalsIgnoreCase("HttpOnly")) {
+                if (value.equalsIgnoreCase("true")) {
+                    sb.append("; ").append(name);
+                }
+
+                continue;
+            }
+
+            sb.append("; ").append(name).append("=").append(value);
+        }
     }
 
     public void setContentType(String type) {
@@ -85,7 +119,7 @@ public class HttpServletResponse {
     }
 
     public void setStatus(int statusCode) {
-        this.statusCode = switch (statusCode){
+        this.statusCode = switch (statusCode) {
             case 200 -> StatusCode.OK;
             case 201 -> StatusCode.CREATED;
             case 400 -> StatusCode.BAD_REQUEST;
@@ -98,6 +132,7 @@ public class HttpServletResponse {
     private void addHeaders() {
         headers.put("Date", LocalDateTime.now().toString());
     }
+
     private void appendHeaders(StringBuilder sb) {
         for (Map.Entry<String, String> kvp : headers.entrySet()) {
             sb.append(kvp.getKey())
@@ -106,6 +141,7 @@ public class HttpServletResponse {
                     .append(System.lineSeparator());
         }
     }
+
     private void appendStatusLine(StringBuilder sb) {
         sb.append(protocol)
                 .append(" ")
@@ -113,6 +149,18 @@ public class HttpServletResponse {
                 .append(" ")
                 .append(statusCode.getMessage())
                 .append(System.lineSeparator());
+    }
+
+    public void addCookie(Cookie cookie) {
+        if (cookie == null) {
+            throw new IllegalArgumentException("Cookie should not be null!");
+        }
+
+        if (cookies == null) {
+            cookies = new ArrayList<>();
+        }
+
+        cookies.add(cookie);
     }
 }
 

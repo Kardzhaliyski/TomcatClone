@@ -103,7 +103,7 @@ public class ServletDispatcher {
         this.servletContext = servletContext;
     }
 
-    public void dispatch(HttpRequest request, Socket socket) throws IOException {
+    public void dispatch(HttpServletRequest request, Socket socket) throws IOException {
         FilterChain chain = getFilterChain(request.path);
         ServletData data = getServletData(request.path);
 
@@ -119,9 +119,11 @@ public class ServletDispatcher {
             }
         }
 
-        HttpServletRequest req = new HttpServletRequest(request, data.servletPath, data.pathInfo);
+        request.setServletPath(data.servletPath);
+        request.setPathInfo(data.pathInfo);
+        request.setContext(servletContext);
         HttpServletResponse res = new HttpServletResponse(request, socket.getOutputStream());
-        chain.doFilter(req, res);
+        chain.doFilter(request, res);
     }
 
     public RequestDispatcher getRequestDispatcher(String path) {

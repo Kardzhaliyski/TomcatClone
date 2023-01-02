@@ -7,6 +7,7 @@ import com.github.kardzhaliyski.tomcatclone.utils.CliOptions;
 
 
 public class Main {
+    private static final String SERVER_XML_PATH = "server/src/main/resources/server.xml";
     public static HelpFormatter helpFormatter = new HelpFormatter();
 
     public static void main(String[] args) {
@@ -23,7 +24,7 @@ public class Main {
 //            return;
 //        }
 
-        ServerBuilder builder = new ServerBuilder("server/src/main/resources/server.xml");
+        ServerBuilder builder = new ServerBuilder(SERVER_XML_PATH);
         Server server = builder.build();
         server.start();
     }
