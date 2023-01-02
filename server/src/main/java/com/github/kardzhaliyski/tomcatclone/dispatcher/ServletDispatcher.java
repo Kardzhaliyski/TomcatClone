@@ -232,7 +232,6 @@ public class ServletDispatcher {
 
                 try {
                     Class<?> clazz = cl.loadClass(className);
-//                                    Class<?> clazz = Class.forName(className);
                     Constructor<?> constructor = clazz.getConstructor();
                     Object instance = constructor.newInstance();
 

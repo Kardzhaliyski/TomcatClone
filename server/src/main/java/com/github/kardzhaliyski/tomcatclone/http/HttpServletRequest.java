@@ -7,8 +7,10 @@ import java.util.Map;
 
 public class HttpServletRequest {
     private final HttpRequest request;
+
     private String servletPath;
     private String pathInfo;
+    private Reader reader = null;
 
     public HttpServletRequest(HttpRequest request, String servletPath, String pathInfo) {
         this.request = request;
@@ -18,8 +20,8 @@ public class HttpServletRequest {
 
     public HttpServletRequest(HttpServletRequest req) {
         this.request = req.request;
-        this.servletPath = getServletPath();
-        this.pathInfo = getPathInfo();
+        this.servletPath = req.getServletPath();
+        this.pathInfo = req.getPathInfo();
     }
 
     public void setPath(String path) {
@@ -31,7 +33,11 @@ public class HttpServletRequest {
     }
 
     public Reader getReader() {
-        return request.reader;
+        if(reader == null) {
+            //todo
+        }
+
+        return reader;
     }
 
     public String getPathInfo() {

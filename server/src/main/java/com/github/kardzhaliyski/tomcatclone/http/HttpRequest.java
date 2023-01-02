@@ -4,6 +4,7 @@ import com.github.kardzhaliyski.tomcatclone.dispatcher.PathData;
 import com.github.kardzhaliyski.tomcatclone.utils.PathParser;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,25 +13,21 @@ public class HttpRequest {
     public String path;
     public String protocol;
     public Map<String, String> headers = new HashMap<>();
-    public Reader reader;
     public Map<String, String> params = new HashMap<>();
 
     public HttpRequest(InputStream inputStream) {
-        InputStreamReader in = new InputStreamReader(inputStream);
-        String line = readLine(in);
+        String line = readLine(inputStream);
         String[] info = line.split(" ");
         method = info[0];
         setPath(info[1]);
         protocol = info[2];
 
-        setHeaders(in);
-
-        reader = in;
+        setHeaders(inputStream);
     }
 
-    private void setHeaders(InputStreamReader in) {
+    private void setHeaders(InputStream inputStream) {
         String line;
-        while ((line = readLine(in)) != null) {
+        while ((line = readLine(inputStream)) != null) {
             if (line.isBlank()) {
                 break;
             }
@@ -55,25 +52,22 @@ public class HttpRequest {
         this.params = parse.params;
     }
 
-    private StringBuilder rlSb;
-
-    private String readLine(InputStreamReader in) {
-        if (rlSb == null) {
-            rlSb = new StringBuilder();
-        } else {
-            rlSb.setLength(0);
-        }
-
+    private String readLine(InputStream in) {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int b;
         try {
-            char c;
-            while ((c = (char) in.read()) != (char) -1 &&
-                    c != System.lineSeparator().charAt(0)) {
-                rlSb.append(c);
+            while ((b = in.read()) != -1) {
+                if ((char) b == '\n') {
+                    break;
+                }
+
+                buffer.write(b);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        return rlSb.length() == 0 ? null : rlSb.toString();
+        String str = buffer.toString(StandardCharsets.UTF_8);
+        return str.length() == 0 ? null : str;
     }
 }

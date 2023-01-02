@@ -3,8 +3,10 @@ package com.github.kardzhaliyski.tomcatclone.http;
 import com.github.kardzhaliyski.tomcatclone.server.Server;
 import com.github.kardzhaliyski.tomcatclone.utils.StatusCode;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.time.Instant;
 
@@ -24,27 +26,6 @@ public class HttpTask implements Runnable {
             HttpRequest request = new HttpRequest(inputStream);
             log(request);
             server.dispatch(request, socket);
-
-
-//            HttpResponse response;
-//            if (request.method.equals("GET")) {
-//                response = GETHandler.handle(server, request);
-//                String ae = request.headers.get("Accept-Encoding");
-//                if (ae != null && ae.contains("gzip")) {
-//                    response.serverAcceptGzip = true;
-//                }
-//
-//                if (response.statusCode == StatusCode.NOT_FOUND) {
-//                    logError(request.method, request.path, response.statusCode);
-//                }
-//            } else {
-//                response = HttpResponseFactory.methodNotAllowed(request.protocol);
-//                logError(request.method, request.path, response.statusCode);
-//            }
-//
-//
-//            OutputStream outputStream = socket.getOutputStream();
-//            response.send(outputStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {

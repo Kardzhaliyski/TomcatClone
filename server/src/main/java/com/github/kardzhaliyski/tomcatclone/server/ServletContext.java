@@ -17,6 +17,8 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServletContext {
     public ServletDispatcher dispatcher;
@@ -30,22 +32,30 @@ public class ServletContext {
         this.root = Path.of(root);
     }
 
-    public ServletContext(String contextPath, File war) throws IOException, SAXException, ParserConfigurationException {
-        root = war.toPath();//todo not sure
+    public ServletContext(String contextPath, File dir) throws IOException, SAXException, ParserConfigurationException {
+        root = dir.toPath(); //todo not sure
         Path webInfDir = root.resolve("WEB-INF");
-        URL classesDir = webInfDir.resolve("classes").toFile().toURI().toURL();
-        URL libDir = webInfDir.resolve("lib").toFile().toURI().toURL(); // add maybe
-        URLClassLoader urlClassLoader = URLClassLoader.newInstance(new URL[]{classesDir}, this.getClass().getClassLoader());
-        ClassLoader pre = Thread.currentThread().getContextClassLoader();
-//        InputStream webXmlIS = urlClassLoader.getResourceAsStream("WEB-INF/web.xml");
+        List<URL> urls = new ArrayList<>();
+        urls.add(webInfDir.resolve("classes").toFile().toURI().toURL());
+        File lib = webInfDir.resolve("lib").toFile();
+        File[] files = lib.listFiles(n -> n.getName().endsWith(".jar"));
+        for (File file : files) {
+            URL url = file.toURI().toURL();
+            urls.add(url);
+        }
+
+        URLClassLoader urlClassLoader = URLClassLoader.newInstance(urls.toArray(URL[]::new), this.getClass().getClassLoader());
         DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document webXml = documentBuilder.parse(webInfDir.resolve("web.xml").toFile());
-        try {
-            Thread.currentThread().setContextClassLoader(urlClassLoader);
+
+//        ClassLoader prevCL = Thread.currentThread().getContextClassLoader();
+//        try {
+//            Thread.currentThread().setContextClassLoader(urlClassLoader);
             this.dispatcher = new ServletDispatcher(urlClassLoader, webXml);
-        } finally {
-            Thread.currentThread().setContextClassLoader(pre);
-        }
+            this.dispatcher.setServletContext(this);
+//        } finally {
+//            Thread.currentThread().setContextClassLoader(prevCL);
+//        }
     }
 
     public HttpServlet getStaticContentServlet() {
