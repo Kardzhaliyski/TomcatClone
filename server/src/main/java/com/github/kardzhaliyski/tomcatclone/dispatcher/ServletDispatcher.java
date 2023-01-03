@@ -6,21 +6,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import com.github.kardzhaliyski.tomcatclone.server.ServletContext;
+import com.github.kardzhaliyski.tomcatclone.http.ServletContext;
 import com.github.kardzhaliyski.tomcatclone.http.*;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.Socket;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Path;
 import java.util.*;
 
 public class ServletDispatcher {

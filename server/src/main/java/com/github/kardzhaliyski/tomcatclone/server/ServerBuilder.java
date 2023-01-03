@@ -1,6 +1,7 @@
 package com.github.kardzhaliyski.tomcatclone.server;
 
 import com.github.kardzhaliyski.tomcatclone.Main;
+import com.github.kardzhaliyski.tomcatclone.http.ServletContext;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.w3c.dom.Document;
@@ -80,14 +81,12 @@ public class ServerBuilder {
                 continue;
             }
 
-//            File[] wars = dir.listFiles(n -> n.getName().endsWith(".war"));
             File[] files = dir.listFiles(File::isDirectory);
-//            int suffixLength = ".war".length();
             for (int j = 0; j < files.length; j++) {
                 String contextPath = files[j].getName();
                 ServletContext context = null;
                 try {
-                    context = new ServletContext(contextPath, files[j]);
+                    context = new ServletContext(files[j]);
                 } catch (IOException | SAXException | ParserConfigurationException e) {
                    //log error
                     continue;
@@ -96,36 +95,6 @@ public class ServerBuilder {
                 contexts.put(contextPath, context);
             }
         }
-
-//        NodeList contextList = doc.getElementsByTagName("Context");
-//        for (int i = 0; i < contextList.getLength(); i++) {
-//            Node contextNode = contextList.item(i);
-//            NamedNodeMap attributes = contextNode.getAttributes();
-//            Node pathNode = attributes.getNamedItem("path");
-//            if (pathNode == null) {
-//                System.out.println("Invalid context element. Couldn't find path attribute.");
-//                continue;
-//            }
-//
-//
-//            Node docBaseNode = attributes.getNamedItem("docBase");
-//            if (docBaseNode == null) {
-//                System.out.println("Invalid context element. Couldn't find docBase attribute.");
-//            }
-//
-//            String pathStr = pathNode.getNodeValue();
-//            String docBase = docBaseNode.getNodeValue();
-//            ServletDispatcher dispatcher = null;
-//            try {
-//                dispatcher = new ServletDispatcher(Path.of(docBase, "WEB-INF"));
-//            } catch (ParserConfigurationException | SAXException | IOException e) {
-//                e.printStackTrace();
-//                continue;
-//            }
-//
-//            ServletContext servletContext = new ServletContext(pathStr, dispatcher, docBase);
-//            contexts.put(pathStr, servletContext);
-//        }
     }
 
     public ServerBuilder(CommandLine cli) {

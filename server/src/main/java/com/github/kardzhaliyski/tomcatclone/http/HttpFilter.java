@@ -1,6 +1,5 @@
 package com.github.kardzhaliyski.tomcatclone.http;
 
-import com.github.kardzhaliyski.tomcatclone.server.ServletContext;
 import com.github.kardzhaliyski.tomcatclone.dispatcher.FilterChain;
 
 import java.io.IOException;

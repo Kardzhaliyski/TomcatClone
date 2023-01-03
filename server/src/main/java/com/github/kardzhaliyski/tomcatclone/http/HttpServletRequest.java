@@ -2,7 +2,6 @@ package com.github.kardzhaliyski.tomcatclone.http;
 
 import com.github.kardzhaliyski.tomcatclone.dispatcher.PathData;
 import com.github.kardzhaliyski.tomcatclone.server.Server;
-import com.github.kardzhaliyski.tomcatclone.server.ServletContext;
 import com.github.kardzhaliyski.tomcatclone.utils.PathParser;
 
 import java.io.ByteArrayOutputStream;
@@ -99,6 +98,10 @@ public class HttpServletRequest {
 
             if(key.equals(SESSION_COOKIE_NAME)) {
                 session = servletContext.getSession(value);
+                if(session != null) {
+                    session.isNew = false;
+                    session.lastAccessedTime = System.currentTimeMillis();
+                }
             }
         }
 

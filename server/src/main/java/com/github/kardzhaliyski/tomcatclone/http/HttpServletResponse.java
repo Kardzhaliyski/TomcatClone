@@ -58,13 +58,25 @@ public class HttpServletResponse {
     private void sendHeaders() {
         headersSend = true;
         StringBuilder sb = new StringBuilder();
+
         appendStatusLine(sb);
+
         addHeaders();
         appendHeaders(sb);
+
+        addCookies();
         appendCookies(sb);
+
         sb.append(System.lineSeparator());
         writer.write(sb.toString());
         writer.flush();
+    }
+
+    private void addCookies() {
+        HttpSession session = request.getSession(false);
+        if(session != null && session.isNew) {
+            addCookie(new Cookie(HttpSession.SESSION_COOKIE_NAME, session.id));
+        }
     }
 
     private void appendCookies(StringBuilder sb) {

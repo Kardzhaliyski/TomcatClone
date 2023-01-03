@@ -1,6 +1,7 @@
 package com.github.kardzhaliyski.tomcatclone.server;
 
 import com.github.kardzhaliyski.tomcatclone.http.RequestDispatcher;
+import com.github.kardzhaliyski.tomcatclone.http.ServletContext;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.cli.Option;
@@ -29,7 +30,7 @@ public class Server {
     public boolean showDirectoryContent;
     public Path root;
     public Set<Option> options;
-    public Map<String,ServletContext> contexts;
+    public Map<String, ServletContext> contexts;
     private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public Server(String root, int port, int threadCount, boolean showDirectoryContent, Set<Option> options, Map<String, ServletContext> contexts) {
