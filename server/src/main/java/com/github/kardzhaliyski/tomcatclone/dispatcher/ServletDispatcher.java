@@ -1,6 +1,8 @@
 package com.github.kardzhaliyski.tomcatclone.dispatcher;
 
 import com.github.kardzhaliyski.tomcatclone.utils.PathParser;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -42,7 +44,7 @@ public class ServletDispatcher {
             try {
                 servlet.service(newRequest, resp);
             } catch (IOException e) {
-                //todo log error
+                LogManager.getLogger(this.getClass()).error(e);
             }
         }
     }
@@ -107,8 +109,8 @@ public class ServletDispatcher {
             if (httpServlet != null) {
                 chain.setServlet(httpServlet);
             } else {
-                // return 404
-                //todo log error
+                chain.setServlet(servletContext.getStaticContentServlet());
+                LogManager.getLogger(this.getClass()).error("Servlet not found but servlet name exists in xml. For: " + data.servletName);
             }
         }
 
@@ -148,7 +150,7 @@ public class ServletDispatcher {
                 if (filter != null) {
                     chain.addFilter(filter);
                 } else {
-                    //todo log error
+                    LogManager.getLogger(this.getClass().getName()).warn("Filter not found for filter mapping. For: " + filterName);
                 }
 
                 continue;
@@ -162,11 +164,9 @@ public class ServletDispatcher {
                     if (filter != null) {
                         chain.addFilter(filter);
                     } else {
-                        //todo log error
+                        LogManager.getLogger(this.getClass().getName()).warn("Filter not found for filter mapping. For: " + filterName);
                     }
                 }
-            } else {
-                //todo maybe throw exception
             }
         }
 
@@ -201,8 +201,6 @@ public class ServletDispatcher {
 
                     break;
                 }
-            } else {
-                //todo maybe throw exception
             }
         }
 
@@ -302,13 +300,13 @@ public class ServletDispatcher {
 
             String servletName = getTextFromTag(elem, "servlet-name");
             if (servletName == null) {
-                //todo log error
+                LogManager.getLogger(this.getClass().getName()).warn("Invalid filter mapping. For: " + filterName);
                 continue;
             }
 
             String pattern = servletMapping.get(servletName);
             if (pattern == null) {
-                //todo log error
+                LogManager.getLogger(this.getClass().getName()).warn("Invalid filter mapping. Could not find servlet with name: " + servletName);
                 continue;
             }
 

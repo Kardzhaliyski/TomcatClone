@@ -12,7 +12,7 @@ public class HttpSession {
     private static final long MILLIS_IN_A_SECOUND = 1000;
     private final long creationTime;
     long lastAccessedTime;
-    private long maxInactiveInterval;
+    private long maxInactiveInterval = DEFAULT_MAX_INACTIVE_INTERVAL;
     boolean isNew = true;
     private ServletContext servletContext;
     final String id;

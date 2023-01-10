@@ -21,7 +21,7 @@ public class StaticContentServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         handle(req);
         if(body == null && bodyFile == null) {
-            //todo return 404
+            writeErrorAsJson(resp, 404, "Page not found.");
             return;
         }
 

@@ -52,8 +52,8 @@ public class Cookie {
         return maxAge == null ? -1 : Integer.parseInt(maxAge);
     }
 
-    public void setMaxAge(int secounds) {
-        putAttribute(MAX_AGE, secounds < 0 ? null : String.valueOf(secounds));
+    public void setMaxAge(int seconds) {
+        putAttribute(MAX_AGE, seconds < 0 ? null : String.valueOf(seconds));
     }
 
     public String getDomain() {

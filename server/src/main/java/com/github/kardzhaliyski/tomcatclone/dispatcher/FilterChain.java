@@ -14,7 +14,6 @@ public class FilterChain {
     private boolean servletUsed = false;
 
     public void doFilter(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        //todo test what happend with filterchain
         if (!filterQueue.isEmpty()) {
             HttpFilter filter = filterQueue.pop();
             filter.doFilter(req, res, this);

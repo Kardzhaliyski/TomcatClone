@@ -105,7 +105,7 @@ public class ServletContext {
         return hs;
     }
 
-    public String generateSessionId() {
+    private String generateSessionId() {
         int salt = random.nextInt();
         String id;
         do {

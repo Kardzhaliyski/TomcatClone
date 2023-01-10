@@ -74,13 +74,13 @@ public class HttpServletResponse {
 
     private void addCookies() {
         HttpSession session = request.getSession(false);
-        if(session != null && session.isNew) {
+        if (session != null && session.isNew) {
             addCookie(new Cookie(HttpSession.SESSION_COOKIE_NAME, session.id));
         }
     }
 
     private void appendCookies(StringBuilder sb) {
-        if(cookies == null) {
+        if (cookies == null) {
             return;
         }
 
